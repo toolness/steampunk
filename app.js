@@ -1,11 +1,11 @@
 var express = require('express'),
     irc = require('irc'),
-    data = require('./data.js'),
+    storage = require('./storage.js'),
     config = require('./config.js'),
     app = express.createServer(),
     io = require('socket.io').listen(app),
     ircClients = {},
-    userChannels = data.load('channels');
+    userChannels = storage.load('channels');
 
 const AWAY_SUFFIX = '-away';
 

@@ -1,41 +1,41 @@
 var assert = require('assert'),
-    data = require('../data');
+    storage = require('../storage');
 
-describe('data.remove()', function() {
+describe('storage.remove()', function() {
   it('should work', function() {
-    data.remove('blargle');
-    var blargle = data.load('blargle');
+    storage.remove('blargle');
+    var blargle = storage.load('blargle');
     blargle.set('u', 'dork');
-    assert.equal(data.load('blargle').get('u'), 'dork');
-    data.remove('blargle');
-    assert.equal(data.load('blargle').get('u', 'not here'), 'not here');
+    assert.equal(storage.load('blargle').get('u'), 'dork');
+    storage.remove('blargle');
+    assert.equal(storage.load('blargle').get('u', 'not here'), 'not here');
   });
 });
 
-describe('data.removeFromSet()', function() {
+describe('storage.removeFromSet()', function() {
   it('should remove existing entries', function() {
-    var blargle = data.load('blargle');
+    var blargle = storage.load('blargle');
     blargle.set('beets', [1,2,3]);
     blargle.removeFromSet('beets', 2);
     assert.deepEqual(blargle.get('beets'), [1,3]);
-    data.remove('blargle');
+    storage.remove('blargle');
   });
 });
 
-describe('data.addToSet()', function() {
+describe('storage.addToSet()', function() {
   it('should add nonexistent entries', function() {
-    var blargle = data.load('blargle');
+    var blargle = storage.load('blargle');
     blargle.set('beets', [1,2,3]);
     blargle.addToSet('beets', 4);
     assert.deepEqual(blargle.get('beets'), [1,2,3,4]);
-    data.remove('blargle');
+    storage.remove('blargle');
   });
 
   it('should not add duplicate entries', function() {
-    var blargle = data.load('blargle');
+    var blargle = storage.load('blargle');
     blargle.set('beets', [1,2,3]);
     blargle.addToSet('beets', 2);
     assert.deepEqual(blargle.get('beets'), [1,2,3]);
-    data.remove('blargle');
+    storage.remove('blargle');
   });
 });

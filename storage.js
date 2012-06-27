@@ -2,7 +2,7 @@ var fs = require('fs'),
     path = require('path');
 
 function keypath(key) {
-  return path.join(__dirname, 'data', key + '.json');
+  return path.join(__dirname, 'storage-data', key + '.json');
 }
 
 exports.remove = function(key) {

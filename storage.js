@@ -5,13 +5,13 @@ function keypath(key) {
   return path.join(__dirname, 'storage-data', key + '.json');
 }
 
-exports.remove = function(key) {
+exports.removeSync = function(key) {
   try {
     fs.unlinkSync(keypath(key));
   } catch (e) {}
 }
 
-exports.load = function(key) {
+exports.loadSync = function(key) {
   var abspath = keypath(key);
   var data = {};
   try {
@@ -25,23 +25,23 @@ exports.load = function(key) {
         return defaultValue;
       return data[name];
     },
-    addToSet: function(name, item) {
+    addToSetSync: function(name, item) {
       var set = this.get(name, []);
       var index = set.indexOf(item);
       if (index == -1) {
         set.push(item);
-        this.set(name, set);
+        this.setSync(name, set);
       }
     },
-    removeFromSet: function(name, item) {
+    removeFromSetSync: function(name, item) {
       var set = this.get(name, []);
       var index = set.indexOf(item);
       if (index != -1) {
         set.splice(index, 1);
-        this.set(name, set);
+        this.setSync(name, set);
       }
     },
-    set: function(name, value) {
+    setSync: function(name, value) {
       data[name] = value;
       fs.writeFileSync(abspath, JSON.stringify(data, null, 2), 'utf8');
     }

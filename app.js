@@ -5,7 +5,7 @@ var express = require('express'),
     app = express.createServer(),
     io = require('socket.io').listen(app),
     ircClients = {},
-    userChannels = storage.load('channels');
+    userChannels = storage.loadSync('channels');
 
 const AWAY_SUFFIX = '-away';
 
@@ -51,7 +51,7 @@ function onUserLogin(socket, username) {
     },
     join: function(channel, nick) {
       if (nick == userConfig.nick)
-        userChannels.addToSet(username, channel);
+        userChannels.addToSetSync(username, channel);
 
       socket.emit('join', {
         channel: channel,
@@ -60,7 +60,7 @@ function onUserLogin(socket, username) {
     },
     part: function (channel, nick, reason) {
       if (nick == userConfig.nick)
-        userChannels.removeFromSet(username, channel);
+        userChannels.removeFromSetSync(username, channel);
       socket.emit('part', {
         channel: channel,
         nick: nick,

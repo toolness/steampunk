@@ -1,10 +1,124 @@
 <!DOCTYPE html>
-<title>IRC Fun!</title>
-<p>Hi.</p>
-<script src="/socket.io/socket.io.js"></script>
+<title>Steampunk IRC</title>
+<style>
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "Helvetica Neue", Helvetica;
+  font-size: 0;
+}
+
+#users {
+  font-size: 12px;
+  position: absolute;
+  width: 20%;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  border-right: 1px solid black;
+  overflow: auto;
+}
+
+#messages {
+  padding: 4px;
+  font-size: 14px;
+  position: absolute;
+  width: 80%;
+  top: 0px;
+  right: 0px;
+  bottom: 36px;
+  overflow: auto;
+}
+
+#messages .log {
+  padding: 2px;
+}
+
+#messages .log.error {
+  color: salmon;
+  font-weight: bold;
+}
+
+#messages .log.info {
+  color: gray;
+}
+
+#messages .log.echo {
+  border-left: 3px solid #c0c0c0;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding-left: 4px;
+  color: gray;
+}
+
+#messages .log.old-msg {
+  color: gray;
+}
+
+#messages .log.private-msg {
+  background: firebrick;
+  color: white;
+}
+
+#messages .log.private-msg .nick {
+  color: yellow;
+}
+
+#messages .log .nick {
+  color: steelblue;
+  font-weight: bold;
+}
+
+#messages .log .target {
+  font-weight: bold;
+}
+
+#messages .log time {
+  float: right;
+  font-size: 12px;
+}
+
+#input-area {
+  position: absolute;
+  padding: 4px;
+  bottom: 0px;
+  right: 0px;
+  height: 36px;
+  width: 80%;
+  background: #f0f0f0;
+  font-size: 20px;
+}
+
+#cmd {
+  width: 100%;
+  border: none;
+  background: inherit;
+  font: inherit;
+}
+</style>
+<div id="users"></div>
+<div id="messages"></div>
+<div id="input-area"><input type="text" id="cmd"></div>
+<script type="text/html" id="message-template">
+  <div class="log message <%- targetType %>">
+    <span class="nick"><%- nick %></span> 
+    @ 
+    <span class="target"><%- target %></span>:
+    <%- text %>
+    <time data-timestamp="<%- timestamp %>"><%- prettyTime %></time>
+  </div>
+</script>
+<script src="socket.io/socket.io.js"></script>
+<script src="jquery.min.js"></script>
+<script src="underscore.min.js"></script>
 <script>
 var irc = {
   socket: null,
+  channels: [],
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
   },
@@ -14,18 +128,8 @@ var irc = {
   part: function(channel) {
     this.socket.emit('part', {channel: channel});
   },
-  getNames: function(channel, cb) {
-    var self = this;
-    
-    function onNames(data) {
-      if (data.channel == channel) {
-        self.socket.removeListener('names', onNames);
-        cb(data.nicks);
-      }
-    }
-    
+  getNames: function(channel) {
     this.socket.emit('names', {channel: channel});
-    self.socket.addListener('names', onNames);
   },
   setCustomGlobalMetadata: function(key, value) {
     this.socket.emit('set-custom-global-metadata', {key: key, value: value});
@@ -49,7 +153,79 @@ var irc = {
   }
 };
 
-onload = function() {
+function splitAtSpace(input) {
+  var firstSpace = input.indexOf(" ");
+  var arg = "";
+  var cmd = input;
+  if (firstSpace != -1) {
+    cmd = input.slice(0, firstSpace);
+    arg = input.slice(firstSpace).trim();
+  }
+  return [cmd, arg];
+}
+
+function handleCommand(input) {
+  var parts = splitAtSpace(input);
+  var cmd = parts[0];
+  var arg = parts[1];
+  
+  if (cmd == "/names") {
+    if (!arg)
+      return log("error", "Please specify a channel to list names of.");
+    log("Looking for people in " + arg + "...");
+    irc.getNames(arg);
+  } else if (cmd == "/join") {
+    if (!arg)
+      return log("error", "Please specify a channel to join.");
+    log("Attempting to join " + arg + "...");
+    irc.join(arg);
+  } else if (cmd == "/leave") {
+    if (!arg)
+      return log("error", "Please specify a channel to leave.");
+    log("Attempting to leave " + arg + "...");
+    irc.part(arg);
+  } else
+    log("error", "Unrecognized command.");
+}
+
+function handleSay(input) {
+  var parts = splitAtSpace(input);
+  var to = parts[0];
+  var msg = parts[1];
+  
+  if (!msg)
+    return log("I understand that you want to talk to " + to + ", but " +
+               "I need a message.");
+  log("Sending your message to " + to + "...");
+  irc.say(to, msg);
+}
+
+$("#cmd").keyup(function(event) {
+  if (event.keyCode == 13) {
+    var input = $(this).val().trim();
+    $(this).val('');
+    if (!input)
+      return;
+    log('echo', input);
+    if (input[0] == '/')
+      handleCommand(input);
+    else
+      handleSay(input);
+  }
+});
+
+function log(type, msg) {
+  if (msg === undefined) {
+    msg = type;
+    type = "info";
+  }
+  $('<div class="log ' + type + '"></div>').text(msg)
+    .appendTo("#messages");
+}
+
+$(window).ready(function() {
+  $("#cmd").focus();
+  log("Connecting...");
   var socket = io.connect();
   socket.on('connect', function() {
     console.log('connect!!!!');
@@ -57,6 +233,46 @@ onload = function() {
       username: 'toolness',
       password: 'blarg'
     });
+  });
+  socket.on('configuration', function(config) {
+    log("info", "You are in channels: " + config.channels.join(", ") + ".");
+    irc.getLoggedMessages(0, undefined, function(messages) {
+      messages.forEach(function(msg) {
+        var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
+        var html = _.template($("#message-template").text(), {
+          targetType: targetType + " old-msg",
+          nick: msg.nick,
+          target: msg.to,
+          text: msg.text,
+          timestamp: msg.timestamp.toString(),
+          prettyTime: prettyDate(msg.timestamp)
+        });
+        $(html.trim()).appendTo("#messages");
+      });
+    });
+  });
+  socket.on('join', function(info) {
+    log("info", info.nick + " has joined " + info.channel + ".");
+  });
+  socket.on('part', function(info) {
+    log("info", info.nick + " has left " + info.channel + ".");
+  });
+  socket.on('names', function(info) {
+    log("info", "Inside " + info.channel + " are: " +
+        Object.keys(info.nicks).join(", ") + ".");
+  });
+  socket.on('message', function(msg) {
+    var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
+    var timestamp = Date.now();
+    var html = _.template($("#message-template").text(), {
+      targetType: targetType,
+      nick: msg.nick,
+      target: msg.to,
+      text: msg.text,
+      timestamp: timestamp.toString(),
+      prettyTime: prettyDate(timestamp)
+    });
+    $(html.trim()).appendTo("#messages");
   });
   ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
    'message', 'custom-global-metadata', 'change-custom-global-metadata',
@@ -69,5 +285,41 @@ onload = function() {
     console.log('O SNAP disconnected.');
   });
   irc.socket = socket;
-};
+});
+
+setInterval(function() {
+  $("time[data-timestamp]").each(function() {
+    var timestamp = $(this).attr("data-timestamp");
+    $(this).text(prettyDate(timestamp));
+  });
+}, 60000);
+
+// From http://ejohn.org/blog/javascript-pretty-date/
+
+/*
+ * JavaScript Pretty Date
+ * Copyright (c) 2011 John Resig (ejohn.org)
+ * Licensed under the MIT and GPL licenses.
+ */
+
+// Takes a numeric timestamp and returns a string representing how
+// long ago the date represents.
+function prettyDate(timestamp){
+  var date = new Date(parseInt(timestamp)),
+    diff = (((new Date()).getTime() - date.getTime()) / 1000),
+    day_diff = Math.floor(diff / 86400);
+      
+  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
+    return;
+      
+  return day_diff == 0 && (
+      diff < 60 && "just now" ||
+      diff < 120 && "1 minute ago" ||
+      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+      diff < 7200 && "1 hour ago" ||
+      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+    day_diff == 1 && "Yesterday" ||
+    day_diff < 7 && day_diff + " days ago" ||
+    day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
+}
 </script>

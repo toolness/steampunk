@@ -45,6 +45,9 @@ function onUserLogin(socket, username) {
       userConfig = config.users[username];
   
   var ircEventListeners = {
+    error: function(message) {
+      socket.emit('irc-error', message);
+    },
     raw: function(message) {
       console.log("RAW", message);
     },

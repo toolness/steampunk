@@ -276,10 +276,14 @@ $(window).ready(function() {
   });
   ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
    'message', 'custom-global-metadata', 'change-custom-global-metadata',
-   'pong', 'logged-messages', 'configuration'].forEach(function(event) {
+   'pong', 'logged-messages', 'configuration', 
+   'irc-error'].forEach(function(event) {
     socket.on(event, function(data) {
       console.log("MESSAGE:", event, data);
     });
+  });
+  socket.on('irc-error', function(info) {
+    log("error", "Alas, an IRC error occurred: " + info.command);
   });
   socket.on('disconnect', function() {
     console.log('O SNAP disconnected.');

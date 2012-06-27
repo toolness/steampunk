@@ -90,6 +90,10 @@ function onUserLogin(socket, username) {
         text: text
       });
     },
+    registered: function(message) {
+      if (message.args[0] != userConfig.nick)
+        ircClient.send("NICK", userConfig.nick);
+    }
   };
 
   Object.keys(ircEventListeners).forEach(function(event) {

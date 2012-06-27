@@ -6,11 +6,13 @@ var express = require('express'),
     io = require('socket.io').listen(app),
     ircClients = {},
     userMessageLogs = {},
+    userLogoutTimeouts = {},
     userChannels = storage.loadSync('channels'),
     customGlobalMetadata = storage.loadSync('custom-global-metadata');
 
 const AWAY_SUFFIX = '-away',
-      MESSAGE_LOG_SAVE_DELAY = 3000;
+      MESSAGE_LOG_SAVE_DELAY = 3000,
+      USER_LOGOUT_TIMEOUT = 4000;
 
 Object.keys(config.users).forEach(function(username) {
   var user = config.users[username];
@@ -102,7 +104,11 @@ function onUserLogin(socket, username) {
     ircClient.addListener(event, ircEventListeners[event]);
   });
 
-  ircClient.send("NICK", userConfig.nick);
+  clearTimeout(userLogoutTimeouts[username]);
+  delete userLogoutTimeouts[username];
+  
+  if (ircClient.nick != userConfig.nick)
+    ircClient.send("NICK", userConfig.nick);
   socket.emit('configuration', {
     channels: Object.keys(ircClient.chans)
   });
@@ -150,7 +156,9 @@ function onUserLogin(socket, username) {
     Object.keys(ircEventListeners).forEach(function(event) {
       ircClient.removeListener(event, ircEventListeners[event]);
     });
-    ircClient.send("NICK", userConfig.awayNick);
+    userLogoutTimeouts[username] = setTimeout(function() {
+      ircClient.send("NICK", userConfig.awayNick);
+    }, USER_LOGOUT_TIMEOUT);
   });
 }
 

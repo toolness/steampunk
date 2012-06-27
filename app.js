@@ -6,7 +6,8 @@ var express = require('express'),
     io = require('socket.io').listen(app),
     ircClients = {},
     userMessageLogs = {},
-    userChannels = storage.loadSync('channels');
+    userChannels = storage.loadSync('channels'),
+    customGlobalMetadata = storage.loadSync('custom-global-metadata');
 
 const AWAY_SUFFIX = '-away',
       MESSAGE_LOG_SAVE_DELAY = 3000;
@@ -77,6 +78,7 @@ function onUserLogin(socket, username) {
     part: function (channel, nick, reason) {
       if (nick == userConfig.nick)
         userChannels.removeFromSetSync(username, channel);
+
       socket.emit('part', {
         channel: channel,
         nick: nick,
@@ -121,6 +123,16 @@ function onUserLogin(socket, username) {
   });
   socket.on('topic', function(data) {
     ircClient.send("TOPIC", data.channel);
+  });
+  socket.on('set-custom-global-metadata', function(data) {
+    var metadata = customGlobalMetadata.get('data', {});
+    metadata[data.key] = data.value;
+    customGlobalMetadata.setSync('data', metadata);
+    socket.broadcast.emit('change-custom-global-metadata', data);
+  });
+  socket.on('get-custom-global-metadata', function() {
+    var metadata = customGlobalMetadata.get('data');
+    socket.emit('custom-global-metadata', metadata);
   });
   socket.on('get-logged-messages', function(data) {
     var start = data.start || 0,

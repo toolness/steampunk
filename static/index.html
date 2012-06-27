@@ -3,10 +3,54 @@
 <p>Hi.</p>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-var socket;
+var irc = {
+  socket: null,
+  say: function(target, message) {
+    this.socket.emit('say', {target: target, message: message});
+  },
+  join: function(channel) {
+    this.socket.emit('join', {channel: channel});
+  },
+  part: function(channel) {
+    this.socket.emit('part', {channel: channel});
+  },
+  getNames: function(channel, cb) {
+    var self = this;
+    
+    function onNames(data) {
+      if (data.channel == channel) {
+        self.socket.removeListener('names', onNames);
+        cb(data.nicks);
+      }
+    }
+    
+    this.socket.emit('names', {channel: channel});
+    self.socket.addListener('names', onNames);
+  },
+  setCustomGlobalMetadata: function(key, value) {
+    this.socket.emit('set-custom-global-metadata', {key: key, value: value});
+  },
+  getCustomGlobalMetadata: function(cb) {
+    this.socket.emit('get-custom-global-metadata');
+    this.socket.once('custom-global-metadata', cb);
+  },
+  getLoggedMessages: function(start, end, cb) {
+    var self = this;
+    
+    function onLoggedMessages(data) {
+      if (data.start == (start || 0) && data.end == end) {
+        self.socket.removeListener('logged-messages', onLoggedMessages);
+        cb(data.messages);
+      }
+    }
+    
+    this.socket.emit('get-logged-messages', {start: start, end: end});
+    self.socket.addListener('logged-messages', onLoggedMessages);
+  }
+};
 
 onload = function() {
-  socket = io.connect();
+  var socket = io.connect();
   socket.on('connect', function() {
     console.log('connect!!!!');
     socket.emit('login', {
@@ -14,14 +58,16 @@ onload = function() {
       password: 'blarg'
     });
   });
-  socket.on('go-away', function() {
-    console.log('aw go away.');
-  });
-  socket.on('irc:message', function(data) {
-    console.log('OMG MESSAGE', data);
+  ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
+   'message', 'custom-global-metadata', 'change-custom-global-metadata',
+   'pong', 'logged-messages', 'configuration'].forEach(function(event) {
+    socket.on(event, function(data) {
+      console.log("MESSAGE:", event, data);
+    });
   });
   socket.on('disconnect', function() {
     console.log('O SNAP disconnected.');
   });
+  irc.socket = socket;
 };
 </script>

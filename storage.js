@@ -3,6 +3,10 @@ var fs = require('fs'),
 
 const DEFAULT_FLUSH_DELAY = 500;
 
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 function keypath(key) {
   return path.join(__dirname, 'storage-data', key + '.json');
 }
@@ -43,7 +47,7 @@ exports.loadSync = function(key, options) {
     get: function(name, defaultValue) {
       if (!(name in data))
         return defaultValue;
-      return data[name];
+      return deepCopy(data[name]);
     },
     addToSetSync: function(name, item) {
       var set = this.get(name, []);
@@ -62,7 +66,7 @@ exports.loadSync = function(key, options) {
       }
     },
     setSync: function(name, value) {
-      data[name] = value;
+      data[name] = deepCopy(value);
       fs.writeFileSync(abspath, JSON.stringify(data, null, 2), 'utf8');
     },
     appendToList: function(name, options) {

@@ -40,3 +40,17 @@ describe('storage.addToSetSync()', function() {
     storage.removeSync('blargle');
   });
 });
+
+describe('storage._sizedPush()', function() {
+  it('should do nothing when list <= max size', function() {
+    var list = [1,2,3];
+    storage._sizedPush(list, 4, 4);
+    assert.deepEqual(list, [1,2,3,4]);
+  });
+  
+  it('should remove front items when list > max size', function() {
+    var list = [1,2,3];
+    storage._sizedPush(list, 4, 3);
+    assert.deepEqual(list, [2,3,4]);
+  });
+});

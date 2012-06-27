@@ -112,6 +112,9 @@ function onUserLogin(socket, username) {
   socket.on('say', function(data) {
     ircClient.say(data.target, data.message);
   });
+  socket.on('ping', function() {
+    socket.emit('pong');
+  });
   socket.on('topic', function(data) {
     ircClient.send("TOPIC", data.channel);
   });

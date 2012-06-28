@@ -405,7 +405,8 @@ $(window).ready(function() {
     });
   });
   socket.on('configuration', function(config) {
-    log("info", "You are in channels: " + config.channels.join(", ") + ".");
+    log("info", "Your nick is " + config.nick +
+        ". You are in channels: " + config.channels.join(", ") + ".");
     config.channels.forEach(function(channel) {
       irc.getNames(channel);
     });

@@ -25,6 +25,17 @@ Object.keys(config.users).forEach(function(username) {
     channels: userChannels.get(username, []),
     debug: true
   });
+  ircClients[username].on('selfMessage', function(to, text) {
+    userMessageLogs[username].appendToList("entries", {
+      item: {
+        nick: user.nick,
+        to: to,
+        text: text,
+        timestamp: Date.now()
+      },
+      maxLength: config.irc.messageLogEntries
+    });
+  });
   ircClients[username].on('message', function(nick, to, text) {
     userMessageLogs[username].appendToList("entries", {
       item: {

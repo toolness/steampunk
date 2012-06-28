@@ -119,6 +119,9 @@ function onUserLogin(socket, username) {
         text: text
       });
     },
+    whois: function(info) {
+      socket.emit('whois', info);
+    },
     registered: function(message) {
       if (message.args[0] != userConfig.nick)
         ircClient.send("NICK", userConfig.nick);
@@ -152,6 +155,9 @@ function onUserLogin(socket, username) {
   });
   socket.on('ping', function() {
     socket.emit('pong');
+  });
+  socket.on('whois', function(data) {
+    ircClient.whois(data.nick);
   });
   socket.on('topic', function(data) {
     ircClient.send("TOPIC", data.channel);

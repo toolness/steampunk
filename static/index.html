@@ -260,6 +260,12 @@ $(window).ready(function() {
   socket.on('quit', function(info) {
     log("info", info.nick + " has left the server.");
   });
+  socket.on('kick', function(info) {
+    log("info", info.nick + " has been kicked from " + info.channel + ".");
+  });
+  socket.on('kill', function(info) {
+    log("info", info.nick + " has been killed from the server.");
+  });
   socket.on('names', function(info) {
     log("info", "Inside " + info.channel + " are: " +
         Object.keys(info.nicks).join(", ") + ".");

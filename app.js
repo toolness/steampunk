@@ -87,6 +87,21 @@ function onUserLogin(socket, username) {
         channels: channels
       });
     },
+    kick: function(channel, nick, by, reason) {
+      socket.emit('kick', {
+        channel: channel,
+        nick: nick,
+        by: by,
+        reason: reason
+      });
+    },
+    kill: function(nick, reason, channels) {
+      socket.emit('kill', {
+        nick: nick,
+        reason: reason,
+        channels: channels
+      });
+    },
     part: function(channel, nick, reason) {
       if (nick == userConfig.nick)
         userChannels.removeFromSetSync(username, channel);

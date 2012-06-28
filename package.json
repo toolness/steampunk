@@ -1,0 +1,15 @@
+{ "name": "steampunk"
+, "description": "very kludgy irc client."
+, "version": "0.1.0"
+, "private": true
+, "scripts" :
+  { "test" : "node_modules/mocha/bin/mocha -R spec" }
+, "dependencies":
+  { "express": "2.5.x"
+  , "socket.io": "0.9.x"
+  , "mocha": "1.2.x"
+  , "irc": "0.3.x"
+  }
+, "engines":
+  { "node":  "*" }
+}

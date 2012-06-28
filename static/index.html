@@ -416,15 +416,41 @@ var Users = {
   }
 };
 
+var Login = {
+  KEY: "steampunk_irc_login_info",
+  set: function(username, password) {
+    localStorage[this.KEY] = JSON.stringify({
+      username: username,
+      password: password
+    });
+  },
+  get: function() {
+    try {
+      return JSON.parse(localStorage[this.KEY]);
+    } catch (e) {
+      return null;
+    }
+  },
+  clear: function() {
+    delete localStorage[this.KEY];
+  }
+};
+
 $(window).ready(function() {
+  var loginInfo = Login.get();
+  if (!loginInfo) {
+    log("error", "Please use Login.set(username, password) at the " +
+        "JS console, then refresh the page to login.");
+    return;
+  }
   $("#cmd").focus();
   log("Connecting...");
   var socket = io.connect();
   socket.on('connect', function() {
     log("Connected. Logging in...");
     socket.emit('login', {
-      username: 'toolness',
-      password: 'blarg'
+      username: loginInfo.username,
+      password: loginInfo.password
     });
   });
   socket.on('configuration', function(config) {

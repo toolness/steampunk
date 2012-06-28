@@ -13,14 +13,39 @@ html {
 }
 
 #users {
-  font-size: 12px;
+  font-size: 14px;
+  background: #f0f0f0;
   position: absolute;
   width: 20%;
   top: 0px;
   left: 0px;
   bottom: 0px;
-  border-right: 1px solid black;
   overflow: auto;
+}
+
+#users .user {
+  padding: 4px;
+}
+
+#users .user:first-child {
+  border-top: none;
+}
+
+#users .user {
+  border-top: 1px dotted gray;
+}
+
+#users .user ul.channels {
+  display: none;
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0;
+  color: gray;
+}
+
+#users .user ul.channels li {
+  display: inline;
+  padding-left: 10px;
 }
 
 #messages {
@@ -65,7 +90,7 @@ html {
 }
 
 #messages .log.private-msg .nick {
-  color: yellow;
+  color: white;
 }
 
 #messages .log .nick {
@@ -89,7 +114,7 @@ html {
   right: 0px;
   height: 36px;
   width: 80%;
-  background: #f0f0f0;
+  background: #b0b0b0;
   font-size: 20px;
 }
 
@@ -131,6 +156,7 @@ var irc = {
     this.socket.emit('join', {channel: channel});
   },
   part: function(channel) {
+    Users.removeChannel(channel);
     this.socket.emit('part', {channel: channel});
   },
   getNames: function(channel) {
@@ -251,6 +277,59 @@ jQuery.fn.extend({
   }
 });
 
+var Users = {
+  el: $("#users"),
+  _removeUsersWithoutChannels: function() {
+    this.el.find('ul.channels:empty').closest(".user").remove();
+  },
+  add: function(nicks, channel) {
+    var el = this.el;
+    channel = channel.slice(1);
+    nicks.forEach(function(nick) {
+      var user = el.find(".nick-" + nick);
+      if (!user.length) {
+        user = $('<div class="user"></div>')
+          .addClass("nick-" + nick).appendTo(el);
+        $('<span class="nick"></span>').text(nick).appendTo(user);
+        $('<ul class="channels"></ul>').appendTo(user);
+      }
+      if (!user.find('ul.channels .channel-' + channel).length) {
+        console.log("adding channel", channel, "to", nick);
+        $('<li></li>').addClass("channel-" + channel).text('#' + channel)
+          .appendTo(user.find('ul.channels'));
+      }
+    });
+  },
+  remove: function(nicks, channel) {
+    var el = this.el;
+    if (channel)
+      channel = channel.slice(1);
+    nicks.forEach(function(nick) {
+      var user = el.find(".nick-" + nick);
+      if (user.length) {
+        if (channel) {
+          user.find('ul.channels .channel-' + channel).remove();
+        } else
+          user.remove();
+      }
+    });
+    this._removeUsersWithoutChannels();
+  },
+  removeChannel: function(channel) {
+    channel = channel.slice(1);
+    this.el.find("ul.channels .channel-" + channel).remove();
+    this._removeUsersWithoutChannels();
+  },
+  change: function(oldnick, newnick) {
+    var user = this.el.find(".nick-" + oldnick);
+    if (user.length) {
+      user.removeClass("nick-" + oldnick);
+      user.addClass("nick-" + newnick);
+      user.find(".nick").text(newnick);
+    }
+  }
+};
+
 $(window).ready(function() {
   $("#cmd").focus();
   log("Connecting...");
@@ -264,6 +343,9 @@ $(window).ready(function() {
   });
   socket.on('configuration', function(config) {
     log("info", "You are in channels: " + config.channels.join(", ") + ".");
+    config.channels.forEach(function(channel) {
+      irc.getNames(channel);
+    });
     irc.getLoggedMessages(0, undefined, function(messages) {
       messages.forEach(function(msg) {
         var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
@@ -280,25 +362,33 @@ $(window).ready(function() {
     });
   });
   socket.on('join', function(info) {
+    Users.add([info.nick], info.channel);
     log("info", info.nick + " has joined " + info.channel + ".");
   });
   socket.on('part', function(info) {
+    Users.remove([info.nick], info.channel);
     log("info", info.nick + " has left " + info.channel + ".");
   });
   socket.on('quit', function(info) {
+    Users.remove([info.nick]);
     log("info", info.nick + " has left the server.");
   });
   socket.on('kick', function(info) {
+    Users.remove([info.nick], info.channel);
     log("info", info.nick + " has been kicked from " + info.channel + ".");
   });
   socket.on('kill', function(info) {
+    Users.remove([info.nick]);
     log("info", info.nick + " has been killed from the server.");
   });
   socket.on('names', function(info) {
+    var nicks = Object.keys(info.nicks);
+    Users.add(nicks, info.channel);
     log("info", "Inside " + info.channel + " are: " +
-        Object.keys(info.nicks).join(", ") + ".");
+        nicks.join(", ") + ".");
   });
   socket.on('nick', function(info) {
+    Users.change(info.oldnick, info.newnick);
     log(info.oldnick + " is now known as " + info.newnick + ".");
   });
   socket.on('message', function(msg) {

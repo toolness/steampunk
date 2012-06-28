@@ -241,21 +241,23 @@ function handleSay(input) {
   if (to[0] == '@') {
     to = to.slice(1);
     if (!to)
-      return log("Please specify a user after @.");
+      return log("error", "Please specify a user after @.");
   } else {
     var channels = getChannelList();
     var matches = getChannelAutocompletions(to, channels);
     if (matches.length == 0)
-      return log("Unknown channel. Please choose from: " +
+      return log("error", "Unknown channel. Please choose from: " +
                  channels.join(", ") + ".");
     if (matches.length > 1)
-      return log("I'm not sure whether you mean " + matches.join(" or ") +
+      return log("error",
+                 "I'm not sure whether you mean " + matches.join(" or ") +
                  ". Please be more specific.");
     to = matches[0];
   }
 
   if (!msg)
-    return log("I understand that you want to talk to " + to + ", but " +
+    return log("error",
+               "I understand that you want to talk to " + to + ", but " +
                "I need a message.");
   log("Sending your message to " + to + "...");
   irc.say(to, msg);
@@ -273,7 +275,7 @@ $("#cmd").keyup(function(event) {
     else if (input[0] == '@' || input[0] == '#')
       handleSay(input);
     else
-      log("Your input should start with /, #, or @.");
+      log("error", "Your input should start with /, #, or @.");
   }
 });
 

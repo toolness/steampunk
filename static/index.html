@@ -59,6 +59,22 @@ html {
   overflow: auto;
 }
 
+#messages button.fetch-more {
+  display: block;
+  width: 100%;
+  padding: 4px;
+  border: none;
+  background: #f0f0f0;
+  color: gray;
+  font: inherit;
+  cursor: pointer;
+}
+
+#messages button.fetch-more:hover {
+  background: black;
+  color: white;
+}
+
 #messages .log {
   padding: 4px;
 }
@@ -448,6 +464,52 @@ var Login = {
   }
 };
 
+function showLoggedMessages() {
+  function makeMessageHTML(msg) {
+    msg.timestamp += irc.timeDelta;
+    var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
+    var html = _.template($("#message-template").text(), {
+      targetType: targetType + " old-msg",
+      nick: msg.nick,
+      target: msg.to,
+      html: linkifyTextToHTML(msg.text),
+      timestamp: msg.timestamp.toString(),
+      prettyTime: prettyDate(msg.timestamp)
+    });
+    return html.trim();
+  }
+  
+  var CHUNK_SIZE = 10;
+  var lastChunk = -CHUNK_SIZE;
+  
+  irc.getLoggedMessages(lastChunk, undefined, function(messages) {
+    if (messages.length) {
+      var fetchMore = $('<button class="fetch-more">Click here to see ' +
+                        + CHUNK_SIZE + ' more archived messages.</button>');
+      fetchMore.addToMessages(true).click(function() {
+        if ($(this).hasClass("loading"))
+          return;
+        $(this).addClass("loading");
+        var oldMessages = $('<div class="old-messages"></div>');
+        var newLastChunk = lastChunk - CHUNK_SIZE;
+        irc.getLoggedMessages(newLastChunk, lastChunk, function(messages) {
+          fetchMore.removeClass("loading");
+          messages.forEach(function(msg) {
+            $(makeMessageHTML(msg)).appendTo(oldMessages);
+          });
+          if (messages.length == 0)
+            fetchMore.fadeOut();
+        });
+        lastChunk = newLastChunk;
+        oldMessages.insertAfter(fetchMore).hide().fadeIn();
+      });
+    }
+    messages.forEach(function(msg) {
+      $(makeMessageHTML(msg)).addToMessages(true);
+    });
+  });
+}
+
 $(window).ready(function() {
   var loginInfo = Login.get();
   if (!loginInfo) {
@@ -473,21 +535,7 @@ $(window).ready(function() {
     config.channels.forEach(function(channel) {
       irc.getNames(channel);
     });
-    irc.getLoggedMessages(0, undefined, function(messages) {
-      messages.forEach(function(msg) {
-        msg.timestamp += irc.timeDelta;
-        var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
-        var html = _.template($("#message-template").text(), {
-          targetType: targetType + " old-msg",
-          nick: msg.nick,
-          target: msg.to,
-          html: linkifyTextToHTML(msg.text),
-          timestamp: msg.timestamp.toString(),
-          prettyTime: prettyDate(msg.timestamp)
-        });
-        $(html.trim()).addToMessages(true);
-      });
-    });
+    showLoggedMessages();
   });
   socket.on('join', function(info) {
     Users.add([info.nick], info.channel);

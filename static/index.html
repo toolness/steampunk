@@ -150,6 +150,7 @@ html {
 var irc = {
   socket: null,
   nick: "UNKNOWN",
+  timeDelta: 0,
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
     var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
@@ -467,6 +468,7 @@ $(window).ready(function() {
   });
   socket.on('configuration', function(config) {
     irc.nick = config.nick;
+    irc.timeDelta = Date.now() - config.now;
     log("info", "Your nick is " + config.nick +
         ". You are in channels: " + config.channels.join(", ") + ".");
     config.channels.forEach(function(channel) {
@@ -474,6 +476,7 @@ $(window).ready(function() {
     });
     irc.getLoggedMessages(0, undefined, function(messages) {
       messages.forEach(function(msg) {
+        msg.timestamp += irc.timeDelta;
         var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
         var html = _.template($("#message-template").text(), {
           targetType: targetType + " old-msg",

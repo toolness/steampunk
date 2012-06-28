@@ -150,7 +150,8 @@ function onUserLogin(socket, username) {
     ircClient.send("NICK", userConfig.nick);
   socket.emit('configuration', {
     channels: Object.keys(ircClient.chans),
-    nick: ircClient.nick
+    nick: ircClient.nick,
+    now: Date.now()
   });
   socket.on('join', function(data) {
     ircClient.join(data.channel);

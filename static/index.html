@@ -226,12 +226,23 @@ function log(type, msg) {
 var scrollToTimeout;
 
 jQuery.fn.extend({
-  addToMessages: function() {
-    this.appendTo("#messages");
-    clearTimeout(scrollToTimeout);
-    scrollToTimeout = setTimeout(function() {
-      $('#messages').scrollTo('max', {duration:500});
-    }, 100);
+  addToMessages: function(forceScroll) {
+    var messages = $("#messages");
+    var scrollBottom = messages.scrollTop() + messages.outerHeight();
+    
+    // We don't want to annoy the user by scrolling to the bottom if
+    // they're reading something important in the backbuffer, so only
+    // auto-scroll if they're already at the bottom of the document.
+    if (forceScroll || (scrollBottom == messages[0].scrollHeight)) {
+      clearTimeout(scrollToTimeout);
+      scrollToTimeout = setTimeout(function() {
+          messages.scrollTo('max', {duration:500});
+      }, 100);
+    }
+    // TODO: If they're not at the bottom of the document, display some
+    // other form of visual indication to let them know that new messages
+    // have arrived.
+    this.appendTo(messages);
     return this;
   }
 });
@@ -260,7 +271,7 @@ $(window).ready(function() {
           timestamp: msg.timestamp.toString(),
           prettyTime: prettyDate(msg.timestamp)
         });
-        $(html.trim()).addToMessages();
+        $(html.trim()).addToMessages(true);
       });
     });
   });

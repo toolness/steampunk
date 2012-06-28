@@ -261,6 +261,9 @@ $(window).ready(function() {
     log("info", "Inside " + info.channel + " are: " +
         Object.keys(info.nicks).join(", ") + ".");
   });
+  socket.on('nick', function(info) {
+    log(info.oldnick + " is now known as " + info.newnick + ".");
+  });
   socket.on('message', function(msg) {
     var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
     var timestamp = Date.now();

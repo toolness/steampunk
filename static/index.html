@@ -280,7 +280,6 @@ function handleSay(input) {
     return log("error",
                "I understand that you want to talk to " + to + ", but " +
                "I need a message.");
-  log("Sending your message to " + to + "...");
   irc.say(to, msg);
 }
 

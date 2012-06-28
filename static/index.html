@@ -149,7 +149,6 @@ html {
 <script>
 var irc = {
   socket: null,
-  channels: [],
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
   },

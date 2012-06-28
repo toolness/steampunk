@@ -257,6 +257,9 @@ $(window).ready(function() {
   socket.on('part', function(info) {
     log("info", info.nick + " has left " + info.channel + ".");
   });
+  socket.on('quit', function(info) {
+    log("info", info.nick + " has left the server.");
+  });
   socket.on('names', function(info) {
     log("info", "Inside " + info.channel + " are: " +
         Object.keys(info.nicks).join(", ") + ".");

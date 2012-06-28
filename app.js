@@ -80,7 +80,14 @@ function onUserLogin(socket, username) {
         nick: nick
       });
     },
-    part: function (channel, nick, reason) {
+    quit: function(nick, reason, channels) {
+      socket.emit('quit', {
+        nick: nick,
+        reason: reason,
+        channels: channels
+      });
+    },
+    part: function(channel, nick, reason) {
       if (nick == userConfig.nick)
         userChannels.removeFromSetSync(username, channel);
 

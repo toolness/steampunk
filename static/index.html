@@ -149,8 +149,20 @@ html {
 <script>
 var irc = {
   socket: null,
+  nick: "UNKNOWN",
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
+    var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
+    var timestamp = Date.now();
+    var html = _.template($("#message-template").text(), {
+      targetType: targetType + " self-msg",
+      nick: irc.nick,
+      target: target,
+      html: linkifyTextToHTML(message),
+      timestamp: timestamp.toString(),
+      prettyTime: prettyDate(timestamp)
+    });
+    $(html.trim()).addToMessages(true);
   },
   join: function(channel) {
     this.socket.emit('join', {channel: channel});
@@ -454,6 +466,7 @@ $(window).ready(function() {
     });
   });
   socket.on('configuration', function(config) {
+    irc.nick = config.nick;
     log("info", "Your nick is " + config.nick +
         ". You are in channels: " + config.channels.join(", ") + ".");
     config.channels.forEach(function(channel) {
@@ -507,6 +520,8 @@ $(window).ready(function() {
         nicks.join(", ") + ".");
   });
   socket.on('nick', function(info) {
+    if (info.oldnick == irc.nick)
+      irc.nick = info.newnick;
     Users.change(info.oldnick, info.newnick);
     log(info.oldnick + " is now known as " + info.newnick + ".");
   });

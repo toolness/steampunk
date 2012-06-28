@@ -219,16 +219,40 @@ function handleCommand(input) {
     log("error", "Unrecognized command.");
 }
 
+function getChannelList() {
+  var channels = [];
+  Users.el.find("ul.channels > li").each(function() {
+    channels.push($(this).text());
+  });
+  return _.uniq(channels);
+}
+
+function getChannelAutocompletions(to, channels) {
+  return _.filter(channels, function(channel) {
+    return (channel.indexOf(to) == 0);
+  });
+}
+
 function handleSay(input) {
   var parts = splitAtSpace(input);
   var to = parts[0];
   var msg = parts[1];
   
-  if (to[0] == '@')
+  if (to[0] == '@') {
     to = to.slice(1);
-  
-  if (!to)
-    return log("Please specify a user after @.");
+    if (!to)
+      return log("Please specify a user after @.");
+  } else {
+    var channels = getChannelList();
+    var matches = getChannelAutocompletions(to, channels);
+    if (matches.length == 0)
+      return log("Unknown channel. Please choose from: " +
+                 channels.join(", ") + ".");
+    if (matches.length > 1)
+      return log("I'm not sure whether you mean " + matches.join(" or ") +
+                 ". Please be more specific.");
+    to = matches[0];
+  }
 
   if (!msg)
     return log("I understand that you want to talk to " + to + ", but " +

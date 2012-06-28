@@ -114,6 +114,7 @@ html {
 </script>
 <script src="socket.io/socket.io.js"></script>
 <script src="jquery.min.js"></script>
+<script src="scrollto.jquery.min.js"></script>
 <script src="underscore.min.js"></script>
 <script>
 var irc = {
@@ -219,9 +220,21 @@ function log(type, msg) {
     msg = type;
     type = "info";
   }
-  $('<div class="log ' + type + '"></div>').text(msg)
-    .appendTo("#messages");
+  $('<div class="log ' + type + '"></div>').text(msg).addToMessages();
 }
+
+var scrollToTimeout;
+
+jQuery.fn.extend({
+  addToMessages: function() {
+    this.appendTo("#messages");
+    clearTimeout(scrollToTimeout);
+    scrollToTimeout = setTimeout(function() {
+      $('#messages').scrollTo('max', {duration:500});
+    }, 100);
+    return this;
+  }
+});
 
 $(window).ready(function() {
   $("#cmd").focus();
@@ -247,7 +260,7 @@ $(window).ready(function() {
           timestamp: msg.timestamp.toString(),
           prettyTime: prettyDate(msg.timestamp)
         });
-        $(html.trim()).appendTo("#messages");
+        $(html.trim()).addToMessages();
       });
     });
   });
@@ -284,7 +297,7 @@ $(window).ready(function() {
       timestamp: timestamp.toString(),
       prettyTime: prettyDate(timestamp)
     });
-    $(html.trim()).appendTo("#messages");
+    $(html.trim()).addToMessages();
   });
   ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
    'message', 'custom-global-metadata', 'change-custom-global-metadata',

@@ -224,6 +224,12 @@ function handleSay(input) {
   var to = parts[0];
   var msg = parts[1];
   
+  if (to[0] == '@')
+    to = to.slice(1);
+  
+  if (!to)
+    return log("Please specify a user after @.");
+
   if (!msg)
     return log("I understand that you want to talk to " + to + ", but " +
                "I need a message.");
@@ -240,8 +246,10 @@ $("#cmd").keyup(function(event) {
     log('echo', input);
     if (input[0] == '/')
       handleCommand(input);
-    else
+    else if (input[0] == '@' || input[0] == '#')
       handleSay(input);
+    else
+      log("Your input should start with /, #, or @.");
   }
 });
 

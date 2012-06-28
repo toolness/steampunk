@@ -434,7 +434,7 @@ $(window).ready(function() {
   });
   socket.on('quit', function(info) {
     Users.remove([info.nick]);
-    log("info", info.nick + " has left the server.");
+    log("info", info.nick + " has left the building.");
   });
   socket.on('kick', function(info) {
     Users.remove([info.nick], info.channel);

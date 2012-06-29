@@ -164,6 +164,7 @@ html {
 <script src="scrollto.jquery.min.js"></script>
 <script src="underscore.min.js"></script>
 <script src="pretty-date.js"></script>
+<script src="linkify.js"></script>
 <script>
 var irc = {
   socket: null,
@@ -177,7 +178,7 @@ var irc = {
       targetType: targetType + " self-msg",
       nick: irc.nick,
       target: target,
-      html: linkifyTextToHTML(message),
+      html: enrichMessageText(message),
       timestamp: timestamp.toString(),
       prettyTime: prettyDate(timestamp)
     });
@@ -316,6 +317,13 @@ $("#cmd").keyup(function(event) {
       log("error", "Your input should start with /, #, or @.");
   }
 });
+
+function enrichMessageText(text) {
+  return linkifyTextToHTML(text, function(anchor) {
+    anchor.setAttribute('target', '_blank');
+    anchor.setAttribute('rel', 'nofollow');
+  });
+}
 
 function log(type, msg) {
   if (msg === undefined) {
@@ -474,7 +482,7 @@ function showLoggedMessages() {
       targetType: targetType + " old-msg",
       nick: msg.nick,
       target: msg.to,
-      html: linkifyTextToHTML(msg.text),
+      html: enrichMessageText(msg.text),
       timestamp: msg.timestamp.toString(),
       prettyTime: prettyDate(msg.timestamp)
     });
@@ -584,7 +592,7 @@ $(window).ready(function() {
       targetType: targetType,
       nick: msg.nick,
       target: msg.to,
-      html: linkifyTextToHTML(msg.text),
+      html: enrichMessageText(msg.text),
       timestamp: timestamp.toString(),
       prettyTime: prettyDate(timestamp)
     });
@@ -613,40 +621,4 @@ setInterval(function() {
     $(this).text(prettyDate(timestamp));
   });
 }, 60000);
-
-// This should be secure because we're never manually escaping anything
-// ourselves; instead, we always use safe DOM methods to do that work
-// for us.
-var linkifyTextToHTML = (function() {
-  // This regex is slightly modified from:
-  // http://www.codinghorror.com/blog/2008/10/the-problem-with-urls.html
-  var RE = /\(?\bhttps?:\/\/[-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#\/%=~_()|]/;
-  
-  return function(text) {
-    function addText(parent, text) {
-      if (text)
-        parent.appendChild(document.createTextNode(text));
-    }
-    
-    var docFrag = document.createElement('span');
-    
-    while (text) {
-      var a = RE.exec(text);
-      if (!a)
-        break;
-      var url = text.slice(a.index, a.index + a[0].length);
-      var anchor = document.createElement('a');
-      anchor.setAttribute('href', url);
-      anchor.setAttribute('target', '_blank');
-      anchor.setAttribute('rel', 'nofollow');
-      addText(docFrag, text.slice(0, a.index));
-      docFrag.appendChild(anchor);
-      addText(anchor, url);
-      text = text.slice(a.index + a[0].length);
-    }
-    if (text)
-      addText(docFrag, text);
-    return docFrag.innerHTML;
-  };
-})();
 </script>

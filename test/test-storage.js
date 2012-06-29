@@ -1,4 +1,4 @@
-var assert = require('assert'),
+var expect = require('expect.js'),
     storage = require('../storage');
 
 describe('storage.removeSync()', function() {
@@ -6,10 +6,10 @@ describe('storage.removeSync()', function() {
     storage.removeSync('blargle');
     var blargle = storage.loadSync('blargle');
     blargle.setSync('u', 'dork');
-    assert.equal(storage.loadSync('blargle').get('u'), 'dork');
+    expect(storage.loadSync('blargle').get('u')).to.be('dork');
     storage.removeSync('blargle');
-    assert.equal(storage.loadSync('blargle').get('u', 'not here'),
-                 'not here');
+    expect(storage.loadSync('blargle').get('u', 'not here'))
+      .to.be('not here');
   });
 });
 
@@ -18,7 +18,7 @@ describe('storage.removeFromSetSync()', function() {
     var blargle = storage.loadSync('blargle');
     blargle.setSync('beets', [1,2,3]);
     blargle.removeFromSetSync('beets', 2);
-    assert.deepEqual(blargle.get('beets'), [1,3]);
+    expect(blargle.get('beets')).to.eql([1,3]);
     storage.removeSync('blargle');
   });
 });
@@ -28,7 +28,7 @@ describe('storage.addToSetSync()', function() {
     var blargle = storage.loadSync('blargle');
     blargle.setSync('beets', [1,2,3]);
     blargle.addToSetSync('beets', 4);
-    assert.deepEqual(blargle.get('beets'), [1,2,3,4]);
+    expect(blargle.get('beets')).to.eql([1,2,3,4]);
     storage.removeSync('blargle');
   });
 
@@ -36,7 +36,7 @@ describe('storage.addToSetSync()', function() {
     var blargle = storage.loadSync('blargle');
     blargle.setSync('beets', [1,2,3]);
     blargle.addToSetSync('beets', 2);
-    assert.deepEqual(blargle.get('beets'), [1,2,3]);
+    expect(blargle.get('beets')).to.eql([1,2,3]);
     storage.removeSync('blargle');
   });
 });
@@ -45,12 +45,12 @@ describe('storage._sizedPush()', function() {
   it('should do nothing when list <= max size', function() {
     var list = [1,2,3];
     storage._sizedPush(list, 4, 4);
-    assert.deepEqual(list, [1,2,3,4]);
+    expect(list).to.eql([1,2,3,4]);
   });
   
   it('should remove front items when list > max size', function() {
     var list = [1,2,3];
     storage._sizedPush(list, 4, 3);
-    assert.deepEqual(list, [2,3,4]);
+    expect(list).to.eql([2,3,4]);
   });
 });

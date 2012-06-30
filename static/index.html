@@ -167,23 +167,38 @@ html {
 <script src="pretty-date.js"></script>
 <script src="linkify.js"></script>
 <script>
+function logMessage(options) {
+  var target = options.target;
+  var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
+  var classSuffix = options.className ? (' ' + options.className) : '';
+  var timestamp = options.timestamp || Date.now();
+  var html = _.template($("#message-template").text(), {
+    targetType: targetType + classSuffix,
+    nick: options.nick,
+    target: target,
+    html: enrichMessageText(options.message),
+    timestamp: timestamp.toString(),
+    prettyTime: prettyDate(timestamp)
+  });
+  if (options.where)
+    $(html.trim()).appendTo(options.where)
+  else
+    $(html.trim()).addToLog("#messages", options.forceScroll);
+}
+
 var irc = {
   socket: null,
   nick: "UNKNOWN",
   timeDelta: 0,
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
-    var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
-    var timestamp = Date.now();
-    var html = _.template($("#message-template").text(), {
-      targetType: targetType + " self-msg",
-      nick: irc.nick,
+    logMessage({
       target: target,
-      html: enrichMessageText(message),
-      timestamp: timestamp.toString(),
-      prettyTime: prettyDate(timestamp)
+      className: "self-msg",
+      nick: irc.nick,
+      message: message,
+      forceScroll: true
     });
-    $(html.trim()).addToLog("#messages", true);
   },
   join: function(channel) {
     this.socket.emit('join', {channel: channel});
@@ -424,22 +439,18 @@ var Login = {
 };
 
 function showLoggedMessages() {
-  function makeMessageHTML(msg) {
-    msg.timestamp += irc.timeDelta;
-    var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
-    var html = _.template($("#message-template").text(), {
-      targetType: targetType + " old-msg",
-      nick: msg.nick,
-      target: msg.to,
-      html: enrichMessageText(msg.text),
-      timestamp: msg.timestamp.toString(),
-      prettyTime: prettyDate(msg.timestamp)
-    });
-    return html.trim();
-  }
-  
   var CHUNK_SIZE = 10;
   var lastChunk = -CHUNK_SIZE;
+  
+  function logOldMessage(msg, options) {
+    logMessage(_.extend({
+      target: msg.to,
+      className: "old-msg",
+      nick: msg.nick,
+      message: msg.text,
+      timestamp: msg.timestamp + irc.timeDelta,
+    }, options));
+  }
   
   irc.getLoggedMessages(lastChunk, undefined, function(messages) {
     if (messages.length) {
@@ -454,7 +465,7 @@ function showLoggedMessages() {
         irc.getLoggedMessages(newLastChunk, lastChunk, function(messages) {
           fetchMore.removeClass("loading");
           messages.forEach(function(msg) {
-            $(makeMessageHTML(msg)).appendTo(oldMessages);
+            logOldMessage(msg, {where: oldMessages});
           });
           if (messages.length == 0)
             fetchMore.fadeOut();
@@ -464,7 +475,7 @@ function showLoggedMessages() {
       });
     }
     messages.forEach(function(msg) {
-      $(makeMessageHTML(msg)).addToLog("#messages", true);
+      logOldMessage(msg, {forceScroll: true});
     });
   });
 }
@@ -535,17 +546,11 @@ $(window).ready(function() {
     log(info.oldnick + " is now known as " + info.newnick + ".");
   });
   socket.on('message', function(msg) {
-    var targetType = (msg.to[0] == "#") ? "channel-msg" : "private-msg";
-    var timestamp = Date.now();
-    var html = _.template($("#message-template").text(), {
-      targetType: targetType,
-      nick: msg.nick,
+    logMessage({
       target: msg.to,
-      html: enrichMessageText(msg.text),
-      timestamp: timestamp.toString(),
-      prettyTime: prettyDate(timestamp)
+      nick: msg.nick,
+      message: msg.text
     });
-    $(html.trim()).addToLog("#messages");
   });
   ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
    'message', 'custom-global-metadata', 'change-custom-global-metadata',

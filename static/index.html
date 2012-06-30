@@ -35,19 +35,6 @@ html {
   border-top: 1px dotted gray;
 }
 
-#users .user ul.channels {
-  display: none;
-  list-style-type: none;
-  margin: 0;
-  padding-left: 0;
-  color: gray;
-}
-
-#users .user ul.channels li {
-  display: inline;
-  padding-left: 10px;
-}
-
 #messages {
   padding: 0;
   font-size: 14px;
@@ -164,6 +151,8 @@ html {
 <script src="scrollto.jquery.min.js"></script>
 <script src="autoscroll-log.jquery.js"></script>
 <script src="underscore.min.js"></script>
+<script src="users.js"></script>
+<script src="user-list-view.js"></script>
 <script src="pretty-date.js"></script>
 <script src="linkify.js"></script>
 <script>
@@ -190,6 +179,7 @@ var irc = {
   socket: null,
   nick: "UNKNOWN",
   timeDelta: 0,
+  users: new Users(),
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
     logMessage({
@@ -204,7 +194,7 @@ var irc = {
     this.socket.emit('join', {channel: channel});
   },
   part: function(channel) {
-    Users.removeChannel(channel);
+    this.users.removeChannel(channel);
     this.socket.emit('part', {channel: channel});
   },
   whois: function(nick) {
@@ -275,14 +265,6 @@ function handleCommand(input) {
     log("error", "Unrecognized command.");
 }
 
-function getChannelList() {
-  var channels = [];
-  Users.el.find("ul.channels > li").each(function() {
-    channels.push($(this).text());
-  });
-  return _.uniq(channels);
-}
-
 function getChannelAutocompletions(to, channels) {
   return _.filter(channels, function(channel) {
     return (channel.indexOf(to) == 0);
@@ -299,7 +281,7 @@ function handleSay(input) {
     if (!to)
       return log("error", "Please specify a user after @.");
   } else {
-    var channels = getChannelList();
+    var channels = irc.users.getAllChannels();
     var matches = getChannelAutocompletions(to, channels);
     if (matches.length == 0)
       return log("error", "Unknown channel. Please choose from: " +
@@ -349,74 +331,6 @@ function log(type, msg) {
   $('<div class="log ' + type + '"></div>').text(msg)
     .addToLog("#messages");
 }
-
-var Users = {
-  el: $("#users"),
-  _removeUsersWithoutChannels: function() {
-    this.el.find('ul.channels:empty').closest(".user").remove();
-  },
-  _insertAlphabetically: function(user, nick) {
-    nick = nick.toLowerCase();
-    var users = this.el.find(".user");
-    for (var i = 0; i < users.length; i++) {
-      var otherNick = $(users[i]).find(".nick").text().toLowerCase();
-      if (nick < otherNick) {
-        user.insertBefore(users[i]);
-        return;
-      }
-    }
-    this.el.append(user);
-  },
-  add: function(nicks, channel) {
-    var el = this.el;
-    var self = this;
-    channel = channel.slice(1);
-    nicks.forEach(function(nick) {
-      var user = el.find(".nick-" + nick);
-      if (!user.length) {
-        user = $('<div class="user"></div>')
-          .addClass("nick-" + nick);
-        self._insertAlphabetically(user, nick);
-        $('<span class="nick"></span>').text(nick).appendTo(user);
-        $('<ul class="channels"></ul>').appendTo(user);
-      }
-      if (!user.find('ul.channels .channel-' + channel).length) {
-        $('<li></li>').addClass("channel-" + channel).text('#' + channel)
-          .appendTo(user.find('ul.channels'));
-      }
-    });
-  },
-  remove: function(nicks, channel) {
-    var el = this.el;
-    if (channel)
-      channel = channel.slice(1);
-    nicks.forEach(function(nick) {
-      var user = el.find(".nick-" + nick);
-      if (user.length) {
-        if (channel) {
-          user.find('ul.channels .channel-' + channel).remove();
-        } else
-          user.remove();
-      }
-    });
-    this._removeUsersWithoutChannels();
-  },
-  removeChannel: function(channel) {
-    channel = channel.slice(1);
-    this.el.find("ul.channels .channel-" + channel).remove();
-    this._removeUsersWithoutChannels();
-  },
-  change: function(oldnick, newnick) {
-    var user = this.el.find(".nick-" + oldnick);
-    if (user.length) {
-      user.removeClass("nick-" + oldnick);
-      user.addClass("nick-" + newnick);
-      user.find(".nick").text(newnick);
-      user.remove();
-      this._insertAlphabetically(user, newnick);
-    }
-  }
-};
 
 var Login = {
   KEY: "steampunk_irc_login_info",
@@ -490,6 +404,7 @@ $(window).ready(function() {
   $("#cmd").focus();
   log("Connecting...");
   var socket = io.connect();
+  var userListView = new UserListView(irc.users, $("#users"));
   socket.on('connect', function() {
     log("Connected. Logging in...");
     socket.emit('login', {
@@ -508,11 +423,11 @@ $(window).ready(function() {
     showLoggedMessages();
   });
   socket.on('join', function(info) {
-    Users.add([info.nick], info.channel);
+    irc.users.add([info.nick], info.channel);
     log("info", info.nick + " has joined " + info.channel + ".");
   });
   socket.on('part', function(info) {
-    Users.remove([info.nick], info.channel);
+    irc.users.remove([info.nick], info.channel);
     log("info", info.nick + " has left " + info.channel + ".");
   });
   socket.on('whois', function(info) {
@@ -522,27 +437,27 @@ $(window).ready(function() {
         "following channels: " + info.channels.join(", ") + ".");
   });
   socket.on('quit', function(info) {
-    Users.remove([info.nick]);
+    irc.users.remove([info.nick]);
     log("info", info.nick + " has left the building.");
   });
   socket.on('kick', function(info) {
-    Users.remove([info.nick], info.channel);
+    irc.users.remove([info.nick], info.channel);
     log("info", info.nick + " has been kicked from " + info.channel + ".");
   });
   socket.on('kill', function(info) {
-    Users.remove([info.nick]);
+    irc.users.remove([info.nick]);
     log("info", info.nick + " has been killed from the server.");
   });
   socket.on('names', function(info) {
     var nicks = Object.keys(info.nicks);
-    Users.add(nicks, info.channel);
+    irc.users.add(nicks, info.channel);
     log("info", "Inside " + info.channel + " are: " +
         nicks.join(", ") + ".");
   });
   socket.on('nick', function(info) {
     if (info.oldnick == irc.nick)
       irc.nick = info.newnick;
-    Users.change(info.oldnick, info.newnick);
+    irc.users.rename(info.oldnick, info.newnick);
     log(info.oldnick + " is now known as " + info.newnick + ".");
   });
   socket.on('message', function(msg) {

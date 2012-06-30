@@ -6,6 +6,8 @@ var Users = (function() {
   Users.prototype = {
     add: function(nicks, channel) {
       var self = this;
+      if (typeof(nicks) == "string")
+        nicks = [nicks];
       nicks.forEach(function(nick) {
         if (!(nick in self.nicks))
           self.nicks[nick] = {channels: []};
@@ -22,19 +24,27 @@ var Users = (function() {
         delete this.nicks[oldnick];
       }
     },
-    remove: function(nick, channel) {
-      if (!channel)
-        delete this.nicks[nick];
-      else {
-        if (nick in this.nicks) {
-          var user = this.nicks[nick];
-          var index = user.channels.indexOf(channel);
-          if (index != -1)
-            user.channels.splice(index, 1);
-          if (user.channels.length == 0)
-            delete this.nicks[nick];
+    removeChannel: function(channel) {
+      this.remove(Object.keys(this.nicks), channel);
+    },
+    remove: function(nicks, channel) {
+      var self = this;
+      if (typeof(nicks) == "string")
+        nicks = [nicks];
+      nicks.forEach(function(nick) {
+        if (!channel)
+          delete self.nicks[nick];
+        else {
+          if (nick in self.nicks) {
+            var user = self.nicks[nick];
+            var index = user.channels.indexOf(channel);
+            if (index != -1)
+              user.channels.splice(index, 1);
+            if (user.channels.length == 0)
+              delete self.nicks[nick];
+          }
         }
-      }
+      });
     }
   };
   

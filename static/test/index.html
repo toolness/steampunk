@@ -90,6 +90,25 @@ describe('Users.remove()', function() {
 
 });
 
+describe('Users.removeChannel()', function() {
+  it('should remove a channel from all users', function() {
+    var users = new Users();
+    users.add(["bob", "jane"], "#a");
+    users.add(["bob", "jane"], "#b");
+    users.removeChannel("#a");
+    expect(users.get("bob").channels).to.eql(["#b"]);
+    expect(users.get("jane").channels).to.eql(["#b"]);
+  });
+
+  it('should remove users who no longer have any channels', function() {
+    var users = new Users();
+    users.add(["bob", "jane"], "#a");
+    users.removeChannel("#a");
+    expect(users.get("bob")).to.be(null);
+    expect(users.get("jane")).to.be(null);
+  });
+});
+
 describe('linkifyTextToHTML', function() {
   it('should wrap solitary URLs in anchor tags', function() {
     expect(linkifyTextToHTML('http://foo.com'))

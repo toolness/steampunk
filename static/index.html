@@ -162,6 +162,7 @@ html {
 <script src="socket.io/socket.io.js"></script>
 <script src="jquery.min.js"></script>
 <script src="scrollto.jquery.min.js"></script>
+<script src="autoscroll-log.jquery.js"></script>
 <script src="underscore.min.js"></script>
 <script src="pretty-date.js"></script>
 <script src="linkify.js"></script>
@@ -182,7 +183,7 @@ var irc = {
       timestamp: timestamp.toString(),
       prettyTime: prettyDate(timestamp)
     });
-    $(html.trim()).addToMessages(true);
+    $(html.trim()).addToLog("#messages", true);
   },
   join: function(channel) {
     this.socket.emit('join', {channel: channel});
@@ -330,61 +331,9 @@ function log(type, msg) {
     msg = type;
     type = "info";
   }
-  $('<div class="log ' + type + '"></div>').text(msg).addToMessages();
+  $('<div class="log ' + type + '"></div>').text(msg)
+    .addToLog("#messages");
 }
-
-var scrollToTimeout;
-
-jQuery.fn.extend({
-  addToMessages: function(forceScroll) {
-    var MOUSEWHEEL_EVT = "mousewheel DOMMouseScroll";
-
-    function onMouseWheel() {
-      // If the user tries to manually scroll while we're auto-scrolling,
-      // respect their intentions and abort our auto-scroll.
-      messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
-      clearTimeout(scrollToTimeout);
-      messages.stop();
-    }
-    
-    function isScrolledToBottom() {
-      var scrollBottom = messages.scrollTop() + messages.outerHeight();
-      return (scrollBottom == messages[0].scrollHeight);
-    }
-    
-    function scrollToBottomOfMessages() {
-      messages.bind(MOUSEWHEEL_EVT, onMouseWheel);
-      clearTimeout(scrollToTimeout);
-      scrollToTimeout = setTimeout(function() {
-          messages.scrollTo('max', {
-            duration:500,
-            onAfter: function() {
-              messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
-              
-              // If more messages arrived while we were scrolling,
-              // keep scrolling!
-              if (!isScrolledToBottom())
-                scrollToBottomOfMessages();
-            }
-          });
-      }, 100);
-    }
-    
-    var messages = $("#messages");
-    
-    // We don't want to annoy the user by scrolling to the bottom if
-    // they're reading something important in the backbuffer, so only
-    // auto-scroll if they're already at the bottom of the document.
-    if (forceScroll || isScrolledToBottom())
-      scrollToBottomOfMessages();
-    
-    // TODO: If they're not at the bottom of the document, display some
-    // other form of visual indication to let them know that new messages
-    // have arrived.
-    this.appendTo(messages);
-    return this;
-  }
-});
 
 var Users = {
   el: $("#users"),
@@ -496,7 +445,7 @@ function showLoggedMessages() {
     if (messages.length) {
       var fetchMore = $('<button class="fetch-more">Click here to see ' +
                         + CHUNK_SIZE + ' more archived messages.</button>');
-      fetchMore.addToMessages(true).click(function() {
+      fetchMore.addToLog("#messages", true).click(function() {
         if ($(this).hasClass("loading"))
           return;
         $(this).addClass("loading");
@@ -515,7 +464,7 @@ function showLoggedMessages() {
       });
     }
     messages.forEach(function(msg) {
-      $(makeMessageHTML(msg)).addToMessages(true);
+      $(makeMessageHTML(msg)).addToLog("#messages", true);
     });
   });
 }
@@ -596,7 +545,7 @@ $(window).ready(function() {
       timestamp: timestamp.toString(),
       prettyTime: prettyDate(timestamp)
     });
-    $(html.trim()).addToMessages();
+    $(html.trim()).addToLog("#messages");
   });
   ['go-away', 'message', 'names', 'topic', 'nick', 'join', 'part',
    'message', 'custom-global-metadata', 'change-custom-global-metadata',

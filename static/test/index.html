@@ -4,11 +4,58 @@
 <link rel="stylesheet" href="mocha.css">
 <script src="expect.js"></script>
 <script src="mocha.js"></script>
+<script src="../socket.io/socket.io.js"></script>
+<script src="../underscore.min.js"></script>
+<script src="../jquery.min.js"></script>
 <script src="../pretty-date.js"></script>
 <script src="../linkify.js"></script>
 <script src="../users.js"></script>
+<script src="../user-list-view.js"></script>
 <script>
 mocha.setup('bdd');
+
+// On Firefox this is a lazy property that sometimes is set while tests
+// are running, which triggers an erroneous 'global leak detected' error,
+// so let's just make sure it gets put into the global namespace now.
+typeof(getInterface);
+
+describe('UserListView', function() {
+  it('should contain added users', function() {
+    var view = new UserListView(new Users(), $('<div></div>'));
+    view.users.add(["bob", "jane"], "#a");
+    expect(view.el.children()).to.have.length(2);
+  });
+
+  it('should order users alphabetically & case-insensitively', function() {
+    var view = new UserListView(new Users(), $('<div></div>'));
+    view.users.add(["c", "B", "a", "D"], "#a");
+    expect(view.el.find(".nick").text()).to.be("aBcD");
+  });
+
+  it('should not contain duplicate entries', function() {
+    var view = new UserListView(new Users(), $('<div></div>'));
+    view.users.add(["bob", "jane"], "#a");
+    view.users.add(["joe", "jane"], "#a");
+    expect(view.el.find(".nick").text()).to.be("bobjanejoe");
+  });
+
+  it('should not contain removed users', function() {
+    var view = new UserListView(new Users(), $('<div></div>'));
+    view.users.add(["bob", "jane"], "#a");
+    view.users.add(["joe", "jane"], "#b");
+    view.users.remove("bob");
+    expect(view.el.find(".nick").text()).to.be("janejoe");
+    view.users.remove("joe", "#b");
+    expect(view.el.find(".nick").text()).to.be("jane");
+  });
+
+  it('should contain renamed users', function() {
+    var view = new UserListView(new Users(), $('<div></div>'));
+    view.users.add(["bob", "jane"], "#a");
+    view.users.rename("bob", "zangief");
+    expect(view.el.find(".nick").text()).to.be("janezangief");
+  });
+});
 
 describe('Users.getAllChannels()', function() {
   it('should work', function() {

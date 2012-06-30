@@ -4,6 +4,17 @@ var Users = (function() {
   }
 
   Users.prototype = {
+    getAllChannels: function() {
+      var self = this;
+      var allChannels = [];
+      Object.keys(this.nicks).forEach(function(nick) {
+        self.nicks[nick].channels.forEach(function(channel) {
+          if (allChannels.indexOf(channel) == -1)
+            allChannels.push(channel);
+        });
+      });
+      return allChannels;
+    },
     add: function(nicks, channel) {
       var self = this;
       if (typeof(nicks) == "string")

@@ -10,6 +10,15 @@
 <script>
 mocha.setup('bdd');
 
+describe('Users.getAllChannels()', function() {
+  it('should work', function() {
+    var users = new Users();
+    users.add(["bob", "jane"], "#a");
+    users.add(["jim", "jane"], "#b");
+    expect(users.getAllChannels().sort()).to.eql(["#a", "#b"]);
+  });
+});
+
 describe('Users.rename()', function() {
   it('should work', function() {
     var users = new Users();

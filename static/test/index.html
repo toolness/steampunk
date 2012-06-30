@@ -17,7 +17,7 @@ mocha.setup('bdd');
 // On Firefox this is a lazy property that sometimes is set while tests
 // are running, which triggers an erroneous 'global leak detected' error,
 // so let's just make sure it gets put into the global namespace now.
-typeof(getInterface);
+window.getInterface = null;
 
 describe('UserListView', function() {
   it('should contain added users', function() {

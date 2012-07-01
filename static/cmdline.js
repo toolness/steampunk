@@ -45,7 +45,8 @@ var CommandLine = (function() {
       if (cmd in commands)
         commands[cmd](arg);
       else
-        log("error", "Unrecognized command.");
+        log("error", "Sadly, I don't know that command. Please choose " +
+            "from: /" + Object.keys(commands).join(", /") + ".");
     }
 
     function getChannelAutocompletions(to, channels) {

@@ -1,6 +1,30 @@
 var CommandLine = (function() {
   return function(cmd, irc, logArea) {
     var log = logArea.log;
+    var commands = {
+      who: function(arg) {
+        if (!arg)
+          return log("error", "Please specify a channel to list names of, " +
+                     "or a nick to get more information on.");
+        if (arg[0] == '#') {
+          log("Looking for people in " + arg + "...");
+          irc.getNames(arg);
+        } else
+          irc.whois(arg);
+      },
+      join: function(arg) {
+        if (!arg)
+          return log("error", "Please specify a channel to join.");
+        log("Attempting to join " + arg + "...");
+        irc.join(arg);
+      },
+      leave: function(arg) {
+        if (!arg)
+          return log("error", "Please specify a channel to leave.");
+        log("Attempting to leave " + arg + "...");
+        irc.part(arg);
+      }
+    };
     
     function splitAtSpace(input) {
       var firstSpace = input.indexOf(" ");
@@ -15,30 +39,12 @@ var CommandLine = (function() {
 
     function handleCommand(input) {
       var parts = splitAtSpace(input);
-      var cmd = parts[0];
+      var cmd = parts[0].slice(1);
       var arg = parts[1];
 
-      if (cmd == "/who") {
-        if (!arg)
-          return log("error", "Please specify a channel to list names of, " +
-                     "or a nick to get more information on.");
-        if (arg[0] == '#') {
-          log("Looking for people in " + arg + "...");
-          irc.getNames(arg);
-        } else {
-          irc.whois(arg);
-        }
-      } else if (cmd == "/join") {
-        if (!arg)
-          return log("error", "Please specify a channel to join.");
-        log("Attempting to join " + arg + "...");
-        irc.join(arg);
-      } else if (cmd == "/leave") {
-        if (!arg)
-          return log("error", "Please specify a channel to leave.");
-        log("Attempting to leave " + arg + "...");
-        irc.part(arg);
-      } else
+      if (cmd in commands)
+        commands[cmd](arg);
+      else
         log("error", "Unrecognized command.");
     }
 

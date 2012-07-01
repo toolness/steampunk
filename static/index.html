@@ -149,65 +149,14 @@ html {
 <script src="socket.io/socket.io.js"></script>
 <script src="jquery.min.js"></script>
 <script src="scrollto.jquery.min.js"></script>
-<script src="autoscroll-log.jquery.js"></script>
 <script src="underscore.min.js"></script>
 <script src="users.js"></script>
 <script src="cmdline.js"></script>
 <script src="user-list-view.js"></script>
 <script src="pretty-date.js"></script>
 <script src="linkify.js"></script>
+<script src="log-area.js"></script>
 <script>
-function LogArea(options) {
-  var messageTemplate = options.socialMessageTemplate;
-  var messages = $(options.element);
-  
-  function enrichMessageText(text) {
-    return linkifyTextToHTML(text, function(anchor) {
-      anchor.setAttribute('target', '_blank');
-      anchor.setAttribute('rel', 'nofollow');
-    });
-  }
-  
-  setInterval(function() {
-    $("time[data-timestamp]", messages).each(function() {
-      var timestamp = $(this).attr("data-timestamp");
-      $(this).text(prettyDate(timestamp));
-    });
-  }, 60000);
-  
-  return {
-    logSocialMessage: function logSocialMessage(options) {
-      var target = options.target;
-      var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
-      var classSuffix = options.className ? (' ' + options.className) : '';
-      var timestamp = options.timestamp || Date.now();
-      var html = _.template(messageTemplate, {
-        targetType: targetType + classSuffix,
-        nick: options.nick,
-        target: target,
-        html: enrichMessageText(options.message),
-        timestamp: timestamp.toString(),
-        prettyTime: prettyDate(timestamp)
-      }).trim();
-      if (options.where)
-        $(html).appendTo(options.where)
-      else
-        $(html).addToLog(messages, options.forceScroll);
-    },
-    log: function log(type, msg) {
-      if (msg === undefined) {
-        msg = type;
-        type = "info";
-      }
-      $('<div class="log ' + type + '"></div>').text(msg)
-        .addToLog(messages);
-    },
-    logElement: function(element, forceScroll) {
-      $(element).addToLog(messages, forceScroll);
-    }
-  };
-}
-
 var irc = {
   socket: null,
   nick: "UNKNOWN",

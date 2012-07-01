@@ -1,0 +1,98 @@
+var LogArea = (function() {
+  function enrichMessageText(text) {
+    return linkifyTextToHTML(text, function(anchor) {
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'nofollow');
+    });
+  }
+
+  return function LogArea(options) {
+    var messageTemplate = options.socialMessageTemplate;
+    var messages = $(options.element);
+    var scrollToTimeout;
+
+    function addToLog(element, forceScroll) {
+      var MOUSEWHEEL_EVT = "mousewheel DOMMouseScroll";
+      
+      function onMouseWheel() {
+        // If the user tries to manually scroll while we're auto-scrolling,
+        // respect their intentions and abort our auto-scroll.
+        messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
+        clearTimeout(scrollToTimeout);
+        messages.stop();
+      }
+
+      function isScrolledToBottom() {
+        var scrollBottom = messages.scrollTop() + messages.outerHeight();
+        return (scrollBottom == messages[0].scrollHeight);
+      }
+
+      function scrollToBottomOfMessages() {
+        messages.bind(MOUSEWHEEL_EVT, onMouseWheel);
+        clearTimeout(scrollToTimeout);
+        scrollToTimeout = setTimeout(function() {
+            messages.scrollTo('max', {
+              duration:500,
+              onAfter: function() {
+                messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
+
+                // If more messages arrived while we were scrolling,
+                // keep scrolling!
+                if (!isScrolledToBottom())
+                  scrollToBottomOfMessages();
+              }
+            });
+        }, 100);
+      }
+
+      // We don't want to annoy the user by scrolling to the bottom if
+      // they're reading something important in the backbuffer, so only
+      // auto-scroll if they're already at the bottom of the document.
+      if (forceScroll || isScrolledToBottom())
+        scrollToBottomOfMessages();
+
+      // TODO: If they're not at the bottom of the document, display some
+      // other form of visual indication to let them know that new messages
+      // have arrived.
+      element.appendTo(messages);
+    }
+      
+    setInterval(function() {
+      $("time[data-timestamp]", messages).each(function() {
+        var timestamp = $(this).attr("data-timestamp");
+        $(this).text(prettyDate(timestamp));
+      });
+    }, 60000);
+  
+    return {
+      logSocialMessage: function logSocialMessage(options) {
+        var target = options.target;
+        var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
+        var classSuffix = options.className ? (' ' + options.className) : '';
+        var timestamp = options.timestamp || Date.now();
+        var html = _.template(messageTemplate, {
+          targetType: targetType + classSuffix,
+          nick: options.nick,
+          target: target,
+          html: enrichMessageText(options.message),
+          timestamp: timestamp.toString(),
+          prettyTime: prettyDate(timestamp)
+        }).trim();
+        if (options.where)
+          $(html).appendTo(options.where)
+        else
+          addToLog($(html), options.forceScroll);
+      },
+      log: function log(type, msg) {
+        if (msg === undefined) {
+          msg = type;
+          type = "info";
+        }
+        addToLog($('<div class="log ' + type + '"></div>').text(msg));
+      },
+      logElement: function(element, forceScroll) {
+        addToLog(element, forceScroll);
+      }
+    };
+  };
+})();

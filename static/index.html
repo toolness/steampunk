@@ -157,23 +157,55 @@ html {
 <script src="pretty-date.js"></script>
 <script src="linkify.js"></script>
 <script>
-function logMessage(options) {
-  var target = options.target;
-  var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
-  var classSuffix = options.className ? (' ' + options.className) : '';
-  var timestamp = options.timestamp || Date.now();
-  var html = _.template($("#message-template").text(), {
-    targetType: targetType + classSuffix,
-    nick: options.nick,
-    target: target,
-    html: enrichMessageText(options.message),
-    timestamp: timestamp.toString(),
-    prettyTime: prettyDate(timestamp)
-  });
-  if (options.where)
-    $(html.trim()).appendTo(options.where)
-  else
-    $(html.trim()).addToLog("#messages", options.forceScroll);
+function LogArea(options) {
+  var messageTemplate = options.socialMessageTemplate;
+  var messages = $(options.element);
+  
+  function enrichMessageText(text) {
+    return linkifyTextToHTML(text, function(anchor) {
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'nofollow');
+    });
+  }
+  
+  setInterval(function() {
+    $("time[data-timestamp]", messages).each(function() {
+      var timestamp = $(this).attr("data-timestamp");
+      $(this).text(prettyDate(timestamp));
+    });
+  }, 60000);
+  
+  return {
+    logSocialMessage: function logSocialMessage(options) {
+      var target = options.target;
+      var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
+      var classSuffix = options.className ? (' ' + options.className) : '';
+      var timestamp = options.timestamp || Date.now();
+      var html = _.template(messageTemplate, {
+        targetType: targetType + classSuffix,
+        nick: options.nick,
+        target: target,
+        html: enrichMessageText(options.message),
+        timestamp: timestamp.toString(),
+        prettyTime: prettyDate(timestamp)
+      }).trim();
+      if (options.where)
+        $(html).appendTo(options.where)
+      else
+        $(html).addToLog(messages, options.forceScroll);
+    },
+    log: function log(type, msg) {
+      if (msg === undefined) {
+        msg = type;
+        type = "info";
+      }
+      $('<div class="log ' + type + '"></div>').text(msg)
+        .addToLog(messages);
+    },
+    logElement: function(element, forceScroll) {
+      $(element).addToLog(messages, forceScroll);
+    }
+  };
 }
 
 var irc = {
@@ -183,13 +215,6 @@ var irc = {
   users: new Users(),
   say: function(target, message) {
     this.socket.emit('say', {target: target, message: message});
-    logMessage({
-      target: target,
-      className: "self-msg",
-      nick: irc.nick,
-      message: message,
-      forceScroll: true
-    });
   },
   join: function(channel) {
     this.socket.emit('join', {channel: channel});
@@ -226,22 +251,6 @@ var irc = {
   }
 };
 
-function enrichMessageText(text) {
-  return linkifyTextToHTML(text, function(anchor) {
-    anchor.setAttribute('target', '_blank');
-    anchor.setAttribute('rel', 'nofollow');
-  });
-}
-
-function log(type, msg) {
-  if (msg === undefined) {
-    msg = type;
-    type = "info";
-  }
-  $('<div class="log ' + type + '"></div>').text(msg)
-    .addToLog("#messages");
-}
-
 var Login = {
   KEY: "steampunk_irc_login_info",
   set: function(username, password) {
@@ -262,12 +271,12 @@ var Login = {
   }
 };
 
-function showLoggedMessages() {
+function showLoggedMessages(logArea) {
   var CHUNK_SIZE = 10;
   var lastChunk = -CHUNK_SIZE;
   
   function logOldMessage(msg, options) {
-    logMessage(_.extend({
+    logArea.logSocialMessage(_.extend({
       target: msg.to,
       className: "old-msg",
       nick: msg.nick,
@@ -280,7 +289,7 @@ function showLoggedMessages() {
     if (messages.length) {
       var fetchMore = $('<button class="fetch-more">Click here to see ' +
                         + CHUNK_SIZE + ' more archived messages.</button>');
-      fetchMore.addToLog("#messages", true).click(function() {
+      fetchMore.click(function() {
         if ($(this).hasClass("loading"))
           return;
         $(this).addClass("loading");
@@ -297,6 +306,7 @@ function showLoggedMessages() {
         lastChunk = newLastChunk;
         oldMessages.insertAfter(fetchMore).hide().fadeIn();
       });
+      logArea.logElement(fetchMore);
     }
     messages.forEach(function(msg) {
       logOldMessage(msg, {forceScroll: true});
@@ -306,6 +316,11 @@ function showLoggedMessages() {
 
 $(window).ready(function() {
   var loginInfo = Login.get();
+  var logArea = new LogArea({
+    element: $("#messages"),
+    socialMessageTemplate: $("#message-template").text()
+  });
+  var log = logArea.log;
   if (!loginInfo) {
     log("error", "Please use Login.set(username, password) at the " +
         "JS console, then refresh the page to login.");
@@ -315,7 +330,7 @@ $(window).ready(function() {
   log("Connecting...");
   var socket = io.connect();
   var userListView = new UserListView(irc.users, $("#users"));
-  var cmdLine = new CommandLine($("#cmd"), irc, log);
+  var cmdLine = new CommandLine($("#cmd"), irc, logArea);
   socket.on('connect', function() {
     log("Connected. Logging in...");
     socket.emit('login', {
@@ -331,7 +346,7 @@ $(window).ready(function() {
     config.channels.forEach(function(channel) {
       irc.getNames(channel);
     });
-    showLoggedMessages();
+    showLoggedMessages(logArea);
   });
   socket.on('join', function(info) {
     irc.users.add([info.nick], info.channel);
@@ -372,7 +387,7 @@ $(window).ready(function() {
     log(info.oldnick + " is now known as " + info.newnick + ".");
   });
   socket.on('message', function(msg) {
-    logMessage({
+    logArea.logSocialMessage({
       target: msg.to,
       nick: msg.nick,
       message: msg.text
@@ -394,11 +409,4 @@ $(window).ready(function() {
   });
   irc.socket = socket;
 });
-
-setInterval(function() {
-  $("time[data-timestamp]").each(function() {
-    var timestamp = $(this).attr("data-timestamp");
-    $(this).text(prettyDate(timestamp));
-  });
-}, 60000);
 </script>

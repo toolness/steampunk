@@ -1,5 +1,7 @@
 var CommandLine = (function() {
-  return function(cmd, irc, log) {
+  return function(cmd, irc, logArea) {
+    var log = logArea.log;
+    
     function splitAtSpace(input) {
       var firstSpace = input.indexOf(" ");
       var arg = "";
@@ -73,6 +75,13 @@ var CommandLine = (function() {
                    "I understand that you want to talk to " + to + ", but " +
                    "I need a message.");
       irc.say(to, msg);
+      logArea.logSocialMessage({
+        target: to,
+        className: "self-msg",
+        nick: irc.nick,
+        message: msg,
+        forceScroll: true
+      });
     }
 
     cmd.keyup(function(event) {

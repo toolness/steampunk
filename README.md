@@ -35,5 +35,5 @@ you're joined to.)
   [ZNC]: http://znc.in
   [finette]: http://www.finette.com/
   [steampunk]: http://en.wikipedia.org/wiki/Steampunk
-  [localhost:3000/test/]: http://localhost:3000/test/
+  [localhost:3000/test]: http://localhost:3000/test/
   [localhost:3000]: http://localhost:3000/

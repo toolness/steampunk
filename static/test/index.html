@@ -14,6 +14,16 @@ mocha.setup('bdd');
 // so let's just make sure it gets put into the global namespace now.
 window.getInterface = null;
 
+// We want to "lazily" define tests so that the order of their
+// definition isn't arbitrarily determined by requirejs. This way,
+// the test results will always be reported in the same order, which
+// makes reading test results across multiple page reloads much
+// easier.
+//
+// Note that this has NOTHING to do with the order of
+// actual test execution--our tests should always be isolated from
+// each other so that the order Mocha chooses to run them in
+// doesn't matter.
 function defineTests(deps, fn) {
   define(deps, function() {
     var injectedDeps = arguments;

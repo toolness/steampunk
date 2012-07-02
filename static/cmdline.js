@@ -1,4 +1,4 @@
-var CommandLine = (function() {
+define(function() {
   return function(cmd, irc, logArea, login) {
     var log = logArea.log;
     var commands = {
@@ -135,4 +135,4 @@ var CommandLine = (function() {
     
     return self;
   };
-})();
+});

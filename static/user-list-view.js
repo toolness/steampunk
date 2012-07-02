@@ -1,4 +1,4 @@
-var UserListView = (function() {
+define(function() {
   function insertAlphabetically(el, user, nick) {
     nick = nick.toLowerCase();
     var users = el.find(".user");
@@ -36,4 +36,4 @@ var UserListView = (function() {
       el: el
     };
   };
-})();
+});

@@ -150,13 +150,7 @@ html {
 <script src="jquery.min.js"></script>
 <script src="scrollto.jquery.min.js"></script>
 <script src="underscore.min.js"></script>
-<script src="users.js"></script>
-<script src="irc.js"></script>
-<script src="cmdline.js"></script>
-<script src="user-list-view.js"></script>
-<script src="pretty-date.js"></script>
-<script src="linkify.js"></script>
-<script src="log-area.js"></script>
+<script src="require.min.js"></script>
 <script>
 function Login(key) {
   key = key || "steampunk_irc_login_info";
@@ -226,7 +220,12 @@ function showLoggedMessages(irc, logArea) {
   });
 }
 
-$(window).ready(function() {
+require([
+  "log-area",
+  "irc",
+  "user-list-view",
+  "cmdline"
+], function(LogArea, IRC, UserListView, CommandLine) {
   var login = new Login();
   var loginInfo = login.get();
   var logArea = new LogArea({

@@ -1,22 +1,23 @@
-// Take untrusted text and return a string of safe HTML with all URLs
-// wrapped in anchor tags.
-//
-// This should be secure because we're never manually escaping anything
-// ourselves; instead, we always use safe DOM methods to do that work
-// for us.
-var linkifyTextToHTML = (function() {
+define(function() {
+  // Take untrusted text and return a string of safe HTML with all URLs
+  // wrapped in anchor tags.
+  //
+  // This should be secure because we're never manually escaping anything
+  // ourselves; instead, we always use safe DOM methods to do that work
+  // for us.
+
   // This regex is slightly modified from:
   // http://www.codinghorror.com/blog/2008/10/the-problem-with-urls.html
   var RE = /\(?\bhttps?:\/\/[-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#\/%=~_()|]/;
-  
+
   return function(text, anchorCallback) {
     function addText(parent, text) {
       if (text)
         parent.appendChild(document.createTextNode(text));
     }
-    
+  
     var docFrag = document.createElement('span');
-    
+  
     while (text) {
       var a = RE.exec(text);
       if (!a)
@@ -37,4 +38,4 @@ var linkifyTextToHTML = (function() {
       addText(docFrag, text);
     return docFrag.innerHTML;
   };
-})();
+});

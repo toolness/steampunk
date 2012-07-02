@@ -1,4 +1,4 @@
-var Users = (function() {
+define(function() {
   function Users() {
     this.nicks = {};
   }
@@ -70,4 +70,4 @@ var Users = (function() {
   io.util.mixin(Users, io.EventEmitter);
   
   return Users;
-})();
+});

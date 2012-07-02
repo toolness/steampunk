@@ -7,10 +7,7 @@
 <script src="../socket.io/socket.io.js"></script>
 <script src="../underscore.min.js"></script>
 <script src="../jquery.min.js"></script>
-<script src="../pretty-date.js"></script>
-<script src="../linkify.js"></script>
-<script src="../users.js"></script>
-<script src="../user-list-view.js"></script>
+<script src="../require.min.js"></script>
 <script>
 mocha.setup('bdd');
 
@@ -19,12 +16,29 @@ mocha.setup('bdd');
 // so let's just make sure it gets put into the global namespace now.
 window.getInterface = null;
 
-onload = function() {
+function defineTests(deps, fn) {
+  define(deps, function() {
+    var injectedDeps = arguments;
+    return function describeTests() {
+      fn.apply(this, injectedDeps);
+    };
+  });
+}
+
+require.config({
+  baseUrl: "../"
+});
+
+require([
+  "test/test-user-list-view",
+  "test/test-users",
+  "test/test-linkify",
+  "test/test-pretty-date"
+], function() {
+  Array.prototype.forEach.call(arguments, function(describeTests) {
+    describeTests();
+  });
   mocha.run();
-};
+});
 </script>
-<script src="test-user-list-view.js"></script>
-<script src="test-users.js"></script>
-<script src="test-linkify.js"></script>
-<script src="test-pretty-date.js"></script>
 <div id="mocha"></div>

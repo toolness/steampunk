@@ -1,4 +1,4 @@
-var IRC = (function() {
+define(["users"], function(Users) {
   var DELEGATED_EVENTS = [
     'whois',
     'message',
@@ -129,4 +129,4 @@ var IRC = (function() {
   io.util.mixin(IRC, io.EventEmitter);
   
   return IRC;
-})();
+});

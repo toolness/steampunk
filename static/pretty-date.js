@@ -1,3 +1,5 @@
+"use strict";
+
 define(function() {
   // From http://ejohn.org/blog/javascript-pretty-date/
 

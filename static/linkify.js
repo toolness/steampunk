@@ -1,3 +1,5 @@
+"use strict";
+
 define(function() {
   // Take untrusted text and return a string of safe HTML with all URLs
   // wrapped in anchor tags.

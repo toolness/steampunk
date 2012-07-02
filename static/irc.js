@@ -1,3 +1,5 @@
+"use strict";
+
 define(["users"], function(Users) {
   var DELEGATED_EVENTS = [
     'whois',

@@ -1,3 +1,5 @@
+"use strict";
+
 define(function() {
   return function Login(key) {
     key = key || "steampunk_irc_login_info";

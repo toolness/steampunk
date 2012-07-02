@@ -1,3 +1,5 @@
+"use strict";
+
 define(function() {
   return function(cmd, irc, logArea, login) {
     var log = logArea.log;

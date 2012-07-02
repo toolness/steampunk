@@ -1,3 +1,5 @@
+"use strict";
+
 define(["linkify", "pretty-date"], function(linkifyTextToHTML, prettyDate) {
   function enrichMessageText(text) {
     return linkifyTextToHTML(text, function(anchor) {

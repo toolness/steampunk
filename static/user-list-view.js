@@ -1,3 +1,5 @@
+"use strict";
+
 define(function() {
   function insertAlphabetically(el, user, nick) {
     nick = nick.toLowerCase();

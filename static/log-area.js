@@ -1,6 +1,12 @@
 "use strict";
 
-define(["linkify", "pretty-date"], function(linkifyTextToHTML, prettyDate) {
+define([
+  "jquery",
+  "underscore",
+  "linkify",
+  "pretty-date",
+  "scrollto.jquery"
+], function($, _, linkifyTextToHTML, prettyDate) {
   function enrichMessageText(text) {
     return linkifyTextToHTML(text, function(anchor) {
       anchor.setAttribute('target', '_blank');

@@ -1,6 +1,8 @@
 "use strict";
 
-define(function() {
+define([
+  "jquery"
+], function($) {
   function insertAlphabetically(el, user, nick) {
     nick = nick.toLowerCase();
     var users = el.find(".user");

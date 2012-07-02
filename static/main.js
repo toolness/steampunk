@@ -1,12 +1,14 @@
 "use strict";
 
 define([
+  "jquery",
+  "underscore",
   "log-area",
   "irc",
   "user-list-view",
   "cmdline",
   "login"
-], function(LogArea, IRC, UserListView, CommandLine, Login) {
+], function($, _, LogArea, IRC, UserListView, CommandLine, Login) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;

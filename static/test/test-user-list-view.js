@@ -1,4 +1,8 @@
-defineTests(["users", "user-list-view"], function(Users, UserListView) {
+defineTests([
+  "jquery",
+  "users",
+  "user-list-view"
+], function($, Users, UserListView) {
   describe('UserListView', function() {
     it('should contain added users', function() {
       var view = new UserListView(new Users(), $('<div></div>'));

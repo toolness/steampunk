@@ -1,6 +1,10 @@
 "use strict";
 
-define(["users"], function(Users) {
+define([
+  "users",
+  "event-emitter",
+  "socket.io"
+], function(Users, EventEmitter, io) {
   var DELEGATED_EVENTS = [
     'whois',
     'message',
@@ -128,7 +132,7 @@ define(["users"], function(Users) {
     }
   };
   
-  io.util.mixin(IRC, io.EventEmitter);
+  EventEmitter.mixInto(IRC);
   
   return IRC;
 });

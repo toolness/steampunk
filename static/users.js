@@ -1,6 +1,8 @@
 "use strict";
 
-define(function() {
+define([
+  "event-emitter"
+], function(EventEmitter) {
   function Users() {
     this.nicks = {};
   }
@@ -69,7 +71,7 @@ define(function() {
     }
   };
   
-  io.util.mixin(Users, io.EventEmitter);
+  EventEmitter.mixInto(Users);
   
   return Users;
 });

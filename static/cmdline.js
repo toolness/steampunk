@@ -1,6 +1,6 @@
 "use strict";
 
-define(function() {
+define(["jquery", "underscore"], function($, _) {
   return function(cmd, irc, logArea, login) {
     var log = logArea.log;
     var commands = {

@@ -158,25 +158,30 @@ html {
 <script src="linkify.js"></script>
 <script src="log-area.js"></script>
 <script>
-var Login = {
-  KEY: "steampunk_irc_login_info",
-  set: function(username, password) {
-    localStorage[this.KEY] = JSON.stringify({
-      username: username,
-      password: password
-    });
-  },
-  get: function() {
-    try {
-      return JSON.parse(localStorage[this.KEY]);
-    } catch (e) {
-      return null;
+function Login(key) {
+  key = key || "steampunk_irc_login_info";
+  
+  return {
+    set: function(username, password) {
+      try {
+        localStorage[key] = JSON.stringify({
+          username: username,
+          password: password
+        });
+      } catch (e) {}
+    },
+    get: function() {
+      try {
+        return JSON.parse(localStorage[key]);
+      } catch (e) {
+        return null;
+      }
+    },
+    clear: function() {
+      delete localStorage[key];
     }
-  },
-  clear: function() {
-    delete localStorage[this.KEY];
-  }
-};
+  };
+}
 
 function showLoggedMessages(irc, logArea) {
   var CHUNK_SIZE = 10;
@@ -222,23 +227,24 @@ function showLoggedMessages(irc, logArea) {
 }
 
 $(window).ready(function() {
-  var loginInfo = Login.get();
+  var login = new Login();
+  var loginInfo = login.get();
   var logArea = new LogArea({
     element: $("#messages"),
     socialMessageTemplate: $("#message-template").text()
   });
   var log = logArea.log;
-  if (!loginInfo) {
-    log("error", "Please use Login.set(username, password) at the " +
-        "JS console, then refresh the page to login.");
-    return;
-  }
-  $("#cmd").focus();
-  log("Connecting...");
   var irc = new IRC();
   var userListView = new UserListView(irc.users, $("#users"));
-  var cmdLine = new CommandLine($("#cmd"), irc, logArea);
-  irc.login(loginInfo.username, loginInfo.password);
+  var cmdLine = new CommandLine($("#cmd"), irc, logArea, login);
+
+  if (loginInfo) {
+    cmdLine.execute("/login " + loginInfo.username + " " + 
+                    loginInfo.password);
+  } else
+    log("Please use the /login command to log in.");
+
+  cmdLine.el.focus();
   irc.on('connect', function() { log("Connected. Logging in..."); });
   irc.on('login', function() {
     var channels = irc.users.getAllChannels();
@@ -282,6 +288,10 @@ $(window).ready(function() {
       nick: msg.nick,
       message: msg.text
     });
+  });
+  irc.on('go-away', function() {
+    log("error", "The server does not seem to like you. Consider trying " +
+        "a different username or password.");
   });
   irc.on('irc-error', function(info) {
     log("error", "Alas, an IRC error occurred: " + info.command);

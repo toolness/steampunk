@@ -37,6 +37,9 @@ var Users = (function() {
         this.emit('rename', oldnick, newnick);
       }
     },
+    removeAll: function() {
+      this.remove(Object.keys(this.nicks));
+    },
     removeChannel: function(channel) {
       this.remove(Object.keys(this.nicks), channel);
     },

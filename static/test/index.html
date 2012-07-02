@@ -57,6 +57,17 @@ describe('UserListView', function() {
   });
 });
 
+describe('Users.removeAll()', function() {
+  it('should work', function() {
+    var users = new Users();
+    users.add(["bob", "jane"], "#a");
+    users.add(["jim", "jane"], "#b");
+    users.removeAll();
+    expect(users.getAllChannels()).to.have.length(0);
+    expect(Object.keys(users.nicks)).to.have.length(0);
+  });
+});
+
 describe('Users.getAllChannels()', function() {
   it('should work', function() {
     var users = new Users();

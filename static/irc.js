@@ -27,6 +27,10 @@ var IRC = (function() {
   }
   
   IRC.prototype = {
+    logout: function() {
+      this.socket.disconnect();
+      this.socket = null;
+    },
     login: function(username, password) {
       var self = this;
       this.socket = io.connect();
@@ -67,6 +71,10 @@ var IRC = (function() {
         if (info.oldnick == self.nick)
           self.nick = info.newnick;
         self.users.rename(info.oldnick, info.newnick);
+      });
+      self.socket.on('disconnect', function() {
+        self.nick = "UNKNOWN";
+        self.users.removeAll();
       });
       
       DELEGATED_EVENTS.forEach(function(event) {

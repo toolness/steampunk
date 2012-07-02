@@ -1,7 +1,26 @@
 var CommandLine = (function() {
-  return function(cmd, irc, logArea) {
+  return function(cmd, irc, logArea, login) {
     var log = logArea.log;
     var commands = {
+      login: function(arg) {
+        var parts = arg.split(" ");
+        var username = parts[0];
+        var password = parts[1];
+        
+        if (!username)
+          return log("error", "Please provide a username and password.");
+        if (!password)
+          return log("error", "Please provide a password.");
+        login.set(username, password);
+        log("Connecting...");
+        irc.login(username, password);
+      },
+      logout: function() {
+        log("Logging you out. You may need to reload the page to login " +
+            "again.");
+        login.clear();
+        irc.logout();
+      },
       who: function(arg) {
         if (!arg)
           return log("error", "Please specify a channel to list names of, " +
@@ -98,6 +117,13 @@ var CommandLine = (function() {
         if (!input)
           return;
         log('echo', input);
+        self.execute(input);
+      }
+    });
+    
+    var self = {
+      el: cmd,
+      execute: function(input) {
         if (input[0] == '/')
           handleCommand(input);
         else if (input[0] == '@' || input[0] == '#')
@@ -105,6 +131,8 @@ var CommandLine = (function() {
         else
           log("error", "Your input should start with /, #, or @.");
       }
-    });    
+    };
+    
+    return self;
   };
 })();

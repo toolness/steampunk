@@ -5,8 +5,9 @@ define([
   "underscore",
   "linkify",
   "pretty-date",
+  "text!templates/social-message.html",
   "scrollto.jquery"
-], function($, _, linkifyTextToHTML, prettyDate) {
+], function($, _, linkifyTextToHTML, prettyDate, messageTemplate) {
   function enrichMessageText(text) {
     return linkifyTextToHTML(text, function(anchor) {
       anchor.setAttribute('target', '_blank');
@@ -15,7 +16,6 @@ define([
   }
 
   return function LogArea(options) {
-    var messageTemplate = options.socialMessageTemplate;
     var messages = $(options.element);
     var scrollToTimeout;
 

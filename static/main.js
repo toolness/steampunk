@@ -55,10 +55,7 @@ define([
   function start() {
     var login = new Login();
     var loginInfo = login.get();
-    var logArea = new LogArea({
-      element: $("#messages"),
-      socialMessageTemplate: $("#message-template").text()
-    });
+    var logArea = new LogArea({element: $("#messages")});
     var log = logArea.log;
     var irc = new IRC();
     var userListView = new UserListView(irc.users, $("#users"));

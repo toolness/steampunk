@@ -145,14 +145,5 @@ html {
 <div id="users"></div>
 <div id="messages"></div>
 <div id="input-area"><input type="text" id="cmd"></div>
-<script type="text/html" id="message-template">
-  <div class="log message <%- targetType %>">
-    <span class="nick"><%- nick %></span> 
-    @ 
-    <span class="target"><%- target %></span>:
-    <%= html %>
-    <time data-timestamp="<%- timestamp %>"><%- prettyTime %></time>
-  </div>
-</script>
 <script src="require-config.js"></script>
 <script src="require.min.js" data-main="main"></script>

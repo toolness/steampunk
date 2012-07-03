@@ -8,7 +8,7 @@ define([
   "user-list-view",
   "cmdline",
   "login",
-  "pretty-date"
+  "util/pretty-date"
 ], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
             prettyDate) {
   function showLoggedMessages(irc, logArea) {

@@ -1,4 +1,4 @@
-defineTests(['pretty-date'], function(prettyDate) {
+defineTests(['util/pretty-date'], function(prettyDate) {
   describe('prettyDate()', function() {
     it('should return "in the future" when appropriate', function() {
       var now = Date.now();

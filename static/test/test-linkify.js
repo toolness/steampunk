@@ -1,4 +1,4 @@
-defineTests(["linkify"], function(linkifyTextToHTML) {
+defineTests(["util/linkify"], function(linkifyTextToHTML) {
   describe('linkifyTextToHTML', function() {
     it('should wrap solitary URLs in anchor tags', function() {
       expect(linkifyTextToHTML('http://foo.com'))

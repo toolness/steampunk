@@ -3,8 +3,8 @@
 define([
   "jquery",
   "underscore",
-  "linkify",
-  "pretty-date",
+  "util/linkify",
+  "util/pretty-date",
   "text!templates/social-message.html",
   "scrollto.jquery"
 ], function($, _, linkifyTextToHTML, prettyDate, messageTemplate) {

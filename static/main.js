@@ -60,6 +60,7 @@ define([
     var irc = new IRC();
     var userListView = new UserListView(irc.users, $("#users"));
     var cmdLine = new CommandLine($("#cmd"), irc, logArea, login);
+    var isUnloading = false;
 
     if (loginInfo) {
       cmdLine.execute("/login " + loginInfo.username + " " + 
@@ -120,8 +121,10 @@ define([
       log("error", "Alas, an IRC error occurred: " + info.command);
     });
     irc.on('disconnect', function() {
-      log("error", "The connection to the server has been lost.");
+      if (!isUnloading)
+        log("error", "The connection to the server has been lost.");
     });
+    $(window).on('beforeunload', function() { isUnloading = true; });
     
     return {
       login: login,

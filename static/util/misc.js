@@ -1,3 +1,5 @@
+"use strict";
+
 define(["jquery"], function($) {
   return {
     doesNickMatch: function(base, actual) {

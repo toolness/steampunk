@@ -39,7 +39,9 @@ define([
     },
     login: function(username, password) {
       var self = this;
-      this.socket = io.connect();
+      this.socket = io.connect(undefined, {
+        'force new connection': true
+      });
       self.socket.on('connect', function() {
         self.socket.emit('login', {
           username: username,

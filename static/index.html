@@ -66,6 +66,25 @@ html {
   padding: 4px;
 }
 
+#messages .log.message {
+  font-size: 0;
+}
+
+#messages .log.message .content {
+  display: inline-block;
+  font-size: 14px;
+  width: 85%;
+}
+
+#messages .log.message time {
+  text-align: right;
+  display: inline-block;
+  width: 15%;
+  font-size: 12px;
+  color: gray;
+  vertical-align: top;
+}
+
 #messages .log.error {
   color: firebrick;
   font-weight: bold;
@@ -111,12 +130,6 @@ html {
 
 #messages .log .target {
   font-weight: bold;
-}
-
-#messages .log time {
-  float: right;
-  font-size: 12px;
-  color: gray;
 }
 
 #input-area {

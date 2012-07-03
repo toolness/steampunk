@@ -1,7 +1,9 @@
 <div class="log message <%- targetType %>">
-  <span class="nick"><%- nick %></span> 
-  @ 
-  <span class="target"><%- target %></span>:
-  <%= html %>
+  <div class="content">
+    <span class="nick"><%- nick %></span> 
+    @ 
+    <span class="target"><%- target %></span>:
+    <%= html %>
+  </div>
   <time data-timestamp="<%- timestamp %>"><%- prettyTime %></time>
 </div>

@@ -7,8 +7,10 @@ define([
   "irc",
   "user-list-view",
   "cmdline",
-  "login"
-], function($, _, LogArea, IRC, UserListView, CommandLine, Login) {
+  "login",
+  "pretty-date"
+], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
+            prettyDate) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;
@@ -86,8 +88,14 @@ define([
     irc.on('whois', function(info) {
       if (!info)
         return log("error", "No information is available on that user.");
-      log(info.nick + " is " + info.realname + ". They are in the " +
-          "following channels: " + info.channels.join(", ") + ".");
+      var msg = info.nick + " is " + info.realname + ".";
+      if (info.channels)
+        msg += " They are in the following channels: " +
+               info.channels.join(", ") + "."
+      if (info.idle)
+        msg += " They were last active " +
+               prettyDate(Date.now() - info.idle * 1000) + ".";
+      log(msg);
     });
     irc.on('quit', function(info) {
       log("info", info.nick + " has left the building.");

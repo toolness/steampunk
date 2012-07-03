@@ -1,7 +1,7 @@
 defineTests(["util/misc"], function(misc) {
   var doesNickMatch = misc.doesNickMatch;
   
-  describe("util/misc.doesNickMatch()", function() {
+  describe("doesNickMatch()", function() {
     it("should match joe to joe1", function() {
       expect(doesNickMatch("joe", "joe1")).to.be(true);
     });

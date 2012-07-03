@@ -8,9 +8,10 @@ define([
   "user-list-view",
   "cmdline",
   "login",
-  "util/pretty-date"
+  "util/pretty-date",
+  "util/misc"
 ], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
-            prettyDate) {
+            prettyDate, misc) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;
@@ -133,6 +134,10 @@ define([
         log("error", "The connection to the server has been lost.");
     });
     $(window).on('beforeunload', function() { isUnloading = true; });
+    $(window).on('click', 'span.nick, span.target', function(evt) {
+      misc.insertTextIntoField($(this).text(), cmdLine.el);
+      return false;
+    });
     
     return {
       login: login,

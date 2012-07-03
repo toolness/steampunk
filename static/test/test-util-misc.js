@@ -1,5 +1,6 @@
-defineTests(["util/misc"], function(misc) {
+defineTests(["jquery", "util/misc"], function($, misc) {
   var doesNickMatch = misc.doesNickMatch;
+  var insertTextIntoField = misc.insertTextIntoField;
   
   describe("doesNickMatch()", function() {
     it("should match joe to joe1", function() {
@@ -32,6 +33,17 @@ defineTests(["util/misc"], function(misc) {
 
     it("should NOT match joe to Joe", function() {
       expect(doesNickMatch("joe", "Joe")).to.be(false);
+    });
+  });
+  
+  describe("insertTextIntoField()", function() {
+    it("should insert text at current cursor position", function() {
+      var input = $('<input type="text">').appendTo('body');
+      input.val('hello');
+      input[0].setSelectionRange(1, 1);
+      insertTextIntoField("SUP", input);
+      expect(input.val()).to.be("hSUPello");
+      input.remove();
     });
   });
 });

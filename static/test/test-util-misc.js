@@ -18,6 +18,10 @@ defineTests(["util/misc"], function(misc) {
       expect(doesNickMatch("joe", "joe-away")).to.be(true);
     });
 
+    it("should match joe to joe|otp", function() {
+      expect(doesNickMatch("joe", "joe|otp")).to.be(true);
+    });
+
     it("should match j0e to j0e-away", function() {
       expect(doesNickMatch("j0e", "j0e-away")).to.be(true);
     });

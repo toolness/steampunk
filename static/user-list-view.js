@@ -37,7 +37,10 @@ define([
     });
     return {
       users: users,
-      el: el
+      el: el,
+      getElementForNick: function(nick) {
+        return nicks[nick];
+      }
     };
   };
 });

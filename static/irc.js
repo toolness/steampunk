@@ -115,9 +115,8 @@ define([
       this.socket.emit('set-custom-global-metadata',
                        {key: key, value: value});
     },
-    getCustomGlobalMetadata: function(cb) {
+    getCustomGlobalMetadata: function() {
       this.socket.emit('get-custom-global-metadata');
-      this.socket.once('custom-global-metadata', cb);
     },
     getLoggedMessages: function(start, end, cb) {
       var self = this;

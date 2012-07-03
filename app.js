@@ -176,7 +176,10 @@ function onUserLogin(socket, username) {
   });
   socket.on('set-custom-global-metadata', function(data) {
     var metadata = customGlobalMetadata.get('data', {});
-    metadata[data.key] = data.value;
+    if (!data.value)
+      delete metadata[data.key];
+    else
+      metadata[data.key] = data.value;
     customGlobalMetadata.setSync('data', metadata);
     socket.broadcast.emit('change-custom-global-metadata', data);
   });

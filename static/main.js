@@ -9,9 +9,10 @@ define([
   "cmdline",
   "login",
   "util/pretty-date",
-  "util/misc"
+  "util/misc",
+  "twitter"
 ], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
-            prettyDate, misc) {
+            prettyDate, misc, twitter) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;
@@ -62,7 +63,11 @@ define([
     var log = logArea.log;
     var irc = new IRC();
     var userListView = new UserListView(irc.users, $("#users"));
-    var cmdLine = new CommandLine($("#cmd"), irc, logArea, login);
+    var twitterUsers = new twitter.TwitterUsers(irc);
+    var twitterViewMixIn = new twitter.TwitterViewMixIn(userListView,
+                                                        twitterUsers);
+    var cmdLine = new CommandLine($("#cmd"), irc, logArea, login,
+                                  twitterUsers);
     var isUnloading = false;
 
     if (loginInfo) {
@@ -78,6 +83,7 @@ define([
       log("info", "Your nick is " + irc.nick +
           ". You are in channels: " + channels.join(", ") + ".");
       channels.forEach(function(channel) { irc.getNames(channel); });
+      irc.getCustomGlobalMetadata();
       showLoggedMessages(irc, logArea);
     });
     irc.on('join', function(info) {

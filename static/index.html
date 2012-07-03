@@ -29,7 +29,8 @@ span.nick:hover, span.target:hover {
 }
 
 #users .user {
-  padding: 8px;
+  position: relative;
+  padding: 8px 8px 8px 32px;
 }
 
 #users .user:first-child {
@@ -38,6 +39,17 @@ span.nick:hover, span.target:hover {
 
 #users .user {
   border-top: 1px dotted gray;
+}
+
+#users .user .twitter-user {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+#users .user .twitter-user img {
+  width: 24px;
+  height: 24px;
 }
 
 #messages {

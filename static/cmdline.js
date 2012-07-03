@@ -1,7 +1,7 @@
 "use strict";
 
 define(["jquery", "underscore"], function($, _) {
-  return function(cmd, irc, logArea, login) {
+  return function(cmd, irc, logArea, login, twitterUsers) {
     var log = logArea.log;
     var commands = {
       login: function(arg) {
@@ -44,6 +44,22 @@ define(["jquery", "underscore"], function($, _) {
           return log("error", "Please specify a channel to leave.");
         log("Attempting to leave " + arg + "...");
         irc.part(arg);
+      },
+      twittername: function(arg) {
+        if (!arg)
+          return log("error", "Please provide a nick and, optionally, " +
+                     "its respective Twitter name.");
+        var parts = arg.split(" ");
+        var nick = parts[0].trim();
+        var twitterName = (parts[1] || "").trim();
+
+        if (!twitterName)
+          log("Dissociating " + nick + " from any Twitter username.");
+        else
+          log("Associating " + nick + " with the Twitter username @" +
+              twitterName + ".");
+        
+        twitterUsers.set(nick, twitterName);
       }
     };
     

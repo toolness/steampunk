@@ -19,6 +19,9 @@ define([
       });
       return allChannels;
     },
+    getAllNicks: function() {
+      return Object.keys(this.nicks);
+    },
     add: function(nicks, channel) {
       var self = this;
       if (typeof(nicks) == "string")

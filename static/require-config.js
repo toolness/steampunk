@@ -13,7 +13,11 @@ var require = {
       exports: 'jQuery.fn.scrollTo'
     },
     'socket.io/socket.io': {
-      exports: 'io'
+      exports: function() {
+        var io = window.io;
+        delete window.io;
+        return io;
+      }
     },
     'underscore.min': {
       exports: function() {

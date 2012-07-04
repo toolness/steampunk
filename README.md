@@ -4,6 +4,8 @@ to an IRC server (similar to bouncers like [ZNC][]) and relays messages
 between the browser and the IRC server. Users can easily see messages
 they missed while they were offline.
 
+<img src="http://u.toolness.org/vjoaf">
+
 The name *Steampunk* was chosen because my colleague [Pascal Finette][finette]
 once jokingly referred to IRC as [steampunk][], which I found both
 humorous and apt.

@@ -35,6 +35,26 @@ define([
         delete this.users[nick];
       this.irc.setCustomGlobalMetadata(this.PREFIX + nick, twitterUser);
       this.emit('change');
+    },
+    getAvatarElement: function(nick) {
+      for (var baseNick in this.users) {
+        if (misc.doesNickMatch(baseNick, nick)) {
+          var twitterName = this.users[baseNick];
+          
+          if (!twitterName)
+            return null;
+          
+          var a = $('<a class="twitter-user" target="_blank"></a>')
+            .attr('href', PROFILE_URL + twitterName)
+            .attr('title', nick + ' is @' + twitterName + ' on Twitter.');
+          var img = $('<img>')
+            .attr('alt', 'Twitter avatar for ' + twitterName)
+            .attr('src', AVATAR_IMG + twitterName)
+            .appendTo(a);
+          return a;
+        }
+      }
+      return null;
     }
   };
   
@@ -44,24 +64,9 @@ define([
     TwitterUsers: TwitterUsers,
     TwitterViewMixIn: function(userListView, twitterUsers) {
       function insertTwitterInfo(nick) {
-        for (var baseNick in twitterUsers.users) {
-          if (misc.doesNickMatch(baseNick, nick)) {
-            var twitterName = twitterUsers.users[baseNick];
-            
-            if (!twitterName)
-              return;
-            
-            var a = $('<a class="twitter-user" target="_blank"></a>')
-              .attr('href', PROFILE_URL + twitterName)
-              .attr('title', nick + ' is @' + twitterName + ' on Twitter.');
-            var img = $('<img>')
-              .attr('alt', 'Twitter avator for ' + twitterName)
-              .attr('src', AVATAR_IMG + twitterName)
-              .appendTo(a);
-            userListView.getElementForNick(nick).prepend(a);
-            return;
-          }
-        }
+        var a = twitterUsers.getAvatarElement(nick);
+        if (a)
+          userListView.getElementForNick(nick).prepend(a);
       }
       
       userListView.users.on('add', insertTwitterInfo);

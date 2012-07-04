@@ -59,11 +59,14 @@ define([
   function start() {
     var login = new Login();
     var loginInfo = login.get();
-    var logArea = new LogArea({element: $("#messages")});
-    var log = logArea.log;
     var irc = new IRC();
     var userListView = new UserListView(irc.users, $("#users"));
     var twitterUsers = new twitter.TwitterUsers(irc);
+    var logArea = new LogArea({
+      element: $("#messages"),
+      twitterUsers: twitterUsers
+    });
+    var log = logArea.log;
     var twitterViewMixIn = new twitter.TwitterViewMixIn(userListView,
                                                         twitterUsers);
     var cmdLine = new CommandLine($("#cmd"), irc, logArea, login,

@@ -17,6 +17,7 @@ define([
 
   return function LogArea(options) {
     var messages = $(options.element);
+    var twitterUsers = options.twitterUsers;
     var scrollToTimeout;
 
     function addToLog(element, forceScroll) {
@@ -86,10 +87,16 @@ define([
           timestamp: timestamp.toString(),
           prettyTime: prettyDate(timestamp)
         }).trim();
+        html = $(html);
+        
+        var avatar = twitterUsers.getAvatarElement(options.nick);
+        if (avatar)
+          $(".content", html).prepend(avatar);
+        
         if (options.where)
-          $(html).appendTo(options.where)
+          html.appendTo(options.where)
         else
-          addToLog($(html), options.forceScroll);
+          addToLog(html, options.forceScroll);
       },
       log: function log(type, msg) {
         if (msg === undefined) {

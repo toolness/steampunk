@@ -93,14 +93,21 @@ span.nick:hover, span.target:hover {
   width: 85%;
 }
 
-#messages .log.message .content .twitter-user {
-  float: left;
-  padding-right: 4px;
+#messages .log.message .content .avatar-holder {
+  display: table-cell;
+  padding: 0 2px 0 0;
+  width: 34px;
+  opacity: 0.75;
 }
 
-#messages .log.message .content .twitter-user img {
+#messages .log.message .content .avatar-holder img {
+  vertical-align: top;
   width: 32px;
   height: 32px;
+}
+
+#messages .log.message .content .wrapper {
+  display: table-cell;
 }
 
 #messages .log.message time {

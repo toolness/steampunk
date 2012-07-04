@@ -91,7 +91,7 @@ define([
         
         var avatar = twitterUsers.getAvatarElement(options.nick);
         if (avatar)
-          $(".content", html).prepend(avatar);
+          $(".avatar-holder", html).append(avatar);
         
         if (options.where)
           html.appendTo(options.where)

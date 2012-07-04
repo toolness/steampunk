@@ -20,7 +20,8 @@ define(["jquery"], function($) {
       var oldVal = $(input).val();
       var newVal = oldVal.slice(0, caret) + text + oldVal.slice(caret);
       var moveCursor = function() {
-        input.setSelectionRange(caret+text.length, caret+text.length);
+        if (input.parentNode)
+          input.setSelectionRange(caret+text.length, caret+text.length);
       };
       $(input).val(newVal).focus().trigger("change");
       moveCursor();

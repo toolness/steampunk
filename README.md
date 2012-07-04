@@ -1,6 +1,6 @@
-Steampunk IRC is a simple web-based IRC client. A user's browser
-connects to a server which maintains a persistent connection to an
-IRC server (similar to bouncers like [ZNC][]) and relays messages
+Steampunk IRC is a simple web-based IRC client with Twitter integration.
+A user's browser connects to a server which maintains a persistent connection
+to an IRC server (similar to bouncers like [ZNC][]) and relays messages
 between the browser and the IRC server. Users can easily see messages
 they missed while they were offline.
 
@@ -35,6 +35,10 @@ credentials are stored persistently in your browser; if you want to purge
 them, use **/logout**.
 
 * **/join** *#channel* - Joins you to *#channel*.
+
+* **/twittername** *nick* *twittername* - Associates the IRC user *nick* with
+the Twitter user *twittername*. This association is global for all users
+of the Steampunk server you're connected to.
 
 * **#channel** *message* - Broadcasts a message to **#channel**. You can 
 abbreviate the channel name and the client will automatically send your

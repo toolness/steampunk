@@ -56,21 +56,22 @@ define([
     });
   }
   
-  function start() {
-    var login = new Login();
+  function start(options) {
+    var root = options.root || window;
+    var login = options.login || new Login();
     var loginInfo = login.get();
-    var irc = new IRC();
-    var userListView = new UserListView(irc.users, $("#users"));
+    var irc = options.irc || new IRC();
+    var userListView = new UserListView(irc.users, $(options.users));
     var twitterUsers = new twitter.TwitterUsers(irc);
     var logArea = new LogArea({
-      element: $("#messages"),
+      element: $(options.messages),
       twitterUsers: twitterUsers
     });
     var log = logArea.log;
     var twitterViewMixIn = new twitter.TwitterViewMixIn(userListView,
                                                         twitterUsers);
-    var cmdLine = new CommandLine($("#cmd"), irc, logArea, login,
-                                  twitterUsers);
+    var cmdLine = new CommandLine($(options.commandLine), irc, logArea,
+                                  login, twitterUsers);
     var isUnloading = false;
 
     if (loginInfo) {
@@ -142,8 +143,8 @@ define([
       if (!isUnloading)
         log("error", "The connection to the server has been lost.");
     });
-    $(window).on('beforeunload', function() { isUnloading = true; });
-    $(window).on('click', 'span.nick, span.target', function(evt) {
+    $(root).on('beforeunload', function() { isUnloading = true; });
+    $(root).on('click', 'span.nick, span.target', function(evt) {
       misc.insertTextIntoField($(this).text(), cmdLine.el);
       return false;
     });
@@ -157,5 +158,5 @@ define([
     };
   }
   
-  return start();
+  return start;
 });

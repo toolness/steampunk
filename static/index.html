@@ -197,4 +197,14 @@ span.nick:hover, span.target:hover {
 <div id="messages"></div>
 <div id="input-area"><input type="text" id="cmd"></div>
 <script src="require-config.js"></script>
-<script src="require.min.js" data-main="main"></script>
+<script src="require.min.js"></script>
+<script>
+require(["main"], function(main) {
+  // We're exposing this as a global for debugging purposes ONLY.
+  window.__app = main({
+    users: "#users",
+    commandLine: "#cmd",
+    messages: "#messages"
+  });
+});
+</script>

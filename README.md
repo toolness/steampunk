@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/toolness/steampunk.png?branch=master)](http://travis-ci.org/toolness/steampunk)
+
 Steampunk IRC is a simple web-based IRC client with Twitter integration.
 A user's browser connects to a server which maintains a persistent connection
 to an IRC server (similar to bouncers like [ZNC][]) and relays messages

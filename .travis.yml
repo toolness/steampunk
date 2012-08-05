@@ -1,3 +1,5 @@
 language: node_js
+before_script:
+  - "cp config.sample.js config.js"
 node_js:
   - 0.8

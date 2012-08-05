@@ -49,7 +49,12 @@ require([
   Array.prototype.forEach.call(arguments, function(describeTests) {
     describeTests();
   });
-  mocha.run();
+  var runner = mocha.run(function(f) {
+    console.log('END:' + JSON.stringify({
+      failed: f,
+      total: runner.total
+    }));
+  });
 });
 </script>
 <div id="mocha"></div>

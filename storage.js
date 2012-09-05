@@ -1,5 +1,6 @@
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    rootDir;
 
 const DEFAULT_FLUSH_DELAY = 500;
 
@@ -8,20 +9,27 @@ function deepCopy(obj) {
 }
 
 function keypath(key) {
-  return path.join(__dirname, 'storage-data', key + '.json');
+  if (!rootDir)
+    throw new Error('rootDir is undefined, call configure() first');
+  return path.join(rootDir, key + '.json');
 }
+
+exports.configure = function(options) {
+  rootDir = options.rootDir;
+  return exports;
+};
 
 exports._sizedPush = function(list, item, maxSize) {
   list.push(item);
   if (list.length > maxSize)
     list.splice(0, list.length - maxSize);
-}
+};
 
 exports.removeSync = function(key) {
   try {
     fs.unlinkSync(keypath(key));
   } catch (e) {}
-}
+};
 
 exports.loadSync = function(key, options) {
   options = options || {};

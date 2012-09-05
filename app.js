@@ -1,7 +1,9 @@
 var express = require('express'),
     irc = require('irc'),
-    storage = require('./storage.js'),
-    config = require('./config.js'),
+    storage = require('./storage.js').configure({
+      rootDir: process.env['STORAGE_ROOT_DIR'] || __dirname + '/storage-data'
+    }),
+    config = storage.loadSync('config').get('config'),
     app = express.createServer(),
     io = require('socket.io').listen(app),
     ircClients = {},
@@ -237,6 +239,8 @@ process.on('uncaughtException', function(err) {
 });
 
 if (!module.parent) {
-  console.log("listening on port 3000");
-  app.listen(3000);
+  var port = process.env['PORT'] || 3000;
+  app.listen(port, function() {
+    console.log("listening on port " + port);
+  });
 }

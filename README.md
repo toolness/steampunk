@@ -20,9 +20,9 @@ This project is highly experimental and the UI is quite preliminary.
     cd steampunk
     npm install
     npm test
-    cp config.sample.js config.js
+    cp config.sample.json storage-data/config.json
 
-Edit `config.js` to taste, then run:
+Edit `config.json` to taste, then run:
 
     node app.js
 
@@ -34,7 +34,7 @@ Then go to [localhost:3000][].
 Type **/** to see a list of all available commands.
 
 * **/login** *username* *password* - Logs you into the server with the given
-username and password, which should be listed in `config.js`. Your
+username and password, which should be listed in `config.json`. Your
 credentials are stored persistently in your browser; if you want to purge
 them, use **/logout**.
 

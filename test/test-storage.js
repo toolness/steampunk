@@ -1,5 +1,7 @@
 var expect = require('expect.js'),
-    storage = require('../storage');
+    storage = require('../storage').configure({
+      rootDir: __dirname
+    });
 
 describe('storage.removeSync()', function() {
   it('should work', function() {

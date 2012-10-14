@@ -1,4 +1,5 @@
 language: node_js
+env: PERSONA_AUDIENCE=http://localhost:3000
 before_script:
   - "cp config.sample.json storage-data/config.json"
 node_js:

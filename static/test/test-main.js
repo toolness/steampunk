@@ -5,7 +5,7 @@ defineTests([
   "main"
 ], function($, EventEmitter, Users, main) {
   describe('main app', function() {
-    it('should tell user to use the /login command', function() {
+    it('should tell user to login', function() {
       var login = {
         get: function() {
           return null;
@@ -20,7 +20,12 @@ defineTests([
         commandLine: $('<div></div>'),
         messages: messages,
         irc: irc,
-        login: login
+        login: login,
+        personaLogin: {
+          show: function(options) {
+            options.logArea.log("use the /login command");
+          }
+        }
       });
       expect(messages.text()).to.match(/use the \/login command/);
     });

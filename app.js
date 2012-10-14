@@ -1,5 +1,6 @@
 var express = require('express'),
     irc = require('irc'),
+    persona = require('./persona'),
     storage = require('./storage.js').configure({
       rootDir: process.env['STORAGE_ROOT_DIR'] || __dirname + '/storage-data'
     }),
@@ -15,6 +16,15 @@ var express = require('express'),
 const AWAY_SUFFIX = '-away',
       MESSAGE_LOG_SAVE_DELAY = 3000,
       USER_LOGOUT_TIMEOUT = 4000;
+
+if (!config.audience)
+  config.audience = process.env['PERSONA_AUDIENCE'];
+
+if (!config.audience) {
+  console.log('Please set the PERSONA_AUDIENCE environment variable ' +
+              'or define config.audience.');
+  process.exit(1);
+}
 
 Object.keys(config.users).forEach(function(username) {
   var user = config.users[username];
@@ -52,6 +62,10 @@ Object.keys(config.users).forEach(function(username) {
 });
 
 app.use(express.static(__dirname + '/static'));
+
+app.use(express.bodyParser());
+
+app.post('/verify', persona.LoginFromAssertionEndpoint(config));
 
 function onUserLogin(socket, username) {
   var ircClient = ircClients[username],

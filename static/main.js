@@ -10,9 +10,10 @@ define([
   "login",
   "util/pretty-date",
   "util/misc",
+  "persona-login",
   "twitter"
 ], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
-            prettyDate, misc, twitter) {
+            prettyDate, misc, PersonaLogin, twitter) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;
@@ -59,6 +60,7 @@ define([
   function start(options) {
     var root = options.root || window;
     var login = options.login || new Login();
+    var personaLogin = options.personaLogin || PersonaLogin;
     var loginInfo = login.get();
     var irc = options.irc || new IRC();
     var userListView = new UserListView(irc.users, $(options.users));
@@ -77,8 +79,15 @@ define([
     if (loginInfo) {
       cmdLine.execute("/login " + loginInfo.username + " " + 
                       loginInfo.password);
-    } else
-      log("Please use the /login command to log in.");
+    } else {
+      personaLogin.show({
+        logArea: logArea,
+        success: function(loginInfo) {
+          cmdLine.execute("/login " + loginInfo.username + " " + 
+                          loginInfo.password);
+        }
+      });
+    }
 
     cmdLine.el.focus();
     irc.on('connect', function() { log("Connected. Logging in..."); });
@@ -133,8 +142,8 @@ define([
       });
     });
     irc.on('go-away', function() {
-      log("error", "The server does not seem to like you. Consider trying " +
-          "a different username or password.");
+      log("error", "The server does not seem to like you.");
+      cmdLine.execute("/logout");
     });
     irc.on('irc-error', function(info) {
       log("error", "Alas, an IRC error occurred: " + info.command);

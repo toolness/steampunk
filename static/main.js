@@ -93,8 +93,12 @@ define([
     irc.on('connect', function() { log("Connected. Logging in..."); });
     irc.on('login', function() {
       var channels = irc.users.getAllChannels();
-      log("info", "Your nick is " + irc.nick +
-          ". You are in channels: " + channels.join(", ") + ".");
+      log("info", "Your nick is " + irc.nick + ".");
+      if (channels.length)
+        log("info", "You are in channels: " + channels.join(", ") + ".");
+      else
+        log("info", "You're not in any channels. Join some with the /join " +
+                    "command!");
       channels.forEach(function(channel) { irc.getNames(channel); });
       irc.getCustomGlobalMetadata();
       showLoggedMessages(irc, logArea);

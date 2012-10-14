@@ -16,45 +16,44 @@ define([
   }
 
   return function LogArea(options) {
+    var MOUSEWHEEL_EVT = "mousewheel DOMMouseScroll";
     var socialMessagesLogged = {};
     var messages = $(options.element);
     var twitterUsers = options.twitterUsers;
     var scrollToTimeout;
 
+    function onMouseWheel() {
+      // If the user tries to manually scroll while we're auto-scrolling,
+      // respect their intentions and abort our auto-scroll.
+      messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
+      clearTimeout(scrollToTimeout);
+      messages.stop();
+    }
+
+    function isScrolledToBottom() {
+      var scrollBottom = messages.scrollTop() + messages.outerHeight();
+      return (scrollBottom == messages[0].scrollHeight);
+    }
+
+    function scrollToBottomOfMessages() {
+      messages.bind(MOUSEWHEEL_EVT, onMouseWheel);
+      clearTimeout(scrollToTimeout);
+      scrollToTimeout = setTimeout(function() {
+          messages.scrollTo('max', {
+            duration:500,
+            onAfter: function() {
+              messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
+
+              // If more messages arrived while we were scrolling,
+              // keep scrolling!
+              if (!isScrolledToBottom())
+                scrollToBottomOfMessages();
+            }
+          });
+      }, 100);
+    }
+
     function addToLog(element, forceScroll) {
-      var MOUSEWHEEL_EVT = "mousewheel DOMMouseScroll";
-      
-      function onMouseWheel() {
-        // If the user tries to manually scroll while we're auto-scrolling,
-        // respect their intentions and abort our auto-scroll.
-        messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
-        clearTimeout(scrollToTimeout);
-        messages.stop();
-      }
-
-      function isScrolledToBottom() {
-        var scrollBottom = messages.scrollTop() + messages.outerHeight();
-        return (scrollBottom == messages[0].scrollHeight);
-      }
-
-      function scrollToBottomOfMessages() {
-        messages.bind(MOUSEWHEEL_EVT, onMouseWheel);
-        clearTimeout(scrollToTimeout);
-        scrollToTimeout = setTimeout(function() {
-            messages.scrollTo('max', {
-              duration:500,
-              onAfter: function() {
-                messages.unbind(MOUSEWHEEL_EVT, onMouseWheel);
-
-                // If more messages arrived while we were scrolling,
-                // keep scrolling!
-                if (!isScrolledToBottom())
-                  scrollToBottomOfMessages();
-              }
-            });
-        }, 100);
-      }
-
       // We don't want to annoy the user by scrolling to the bottom if
       // they're reading something important in the backbuffer, so only
       // auto-scroll if they're already at the bottom of the document.
@@ -74,7 +73,13 @@ define([
       });
     }, 60000);
   
+    messages.on("logarea-before-message-change", function(event) {
+      if (isScrolledToBottom())
+        scrollToBottomOfMessages();
+    });
+
     return {
+      messages: messages,
       logSocialMessage: function logSocialMessage(options) {
         var target = options.target;
         var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
@@ -106,6 +111,7 @@ define([
           html.appendTo(options.where)
         else
           addToLog(html, options.forceScroll);
+        html.trigger("logarea-social-message-added");
 
         return true;
       },

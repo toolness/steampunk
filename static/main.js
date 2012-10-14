@@ -11,9 +11,11 @@ define([
   "util/pretty-date",
   "util/misc",
   "persona-login",
+  "convert-links-to-thumbnails",
   "twitter"
 ], function($, _, LogArea, IRC, UserListView, CommandLine, Login,
-            prettyDate, misc, PersonaLogin, twitter) {
+            prettyDate, misc, PersonaLogin, convertLinksToThumbnails,
+            twitter) {
   function showLoggedMessages(irc, logArea) {
     var CHUNK_SIZE = 10;
     var lastChunk = -CHUNK_SIZE;
@@ -90,6 +92,7 @@ define([
       });
     }
 
+    convertLinksToThumbnails(logArea);
     cmdLine.el.focus();
     irc.on('connect', function() { log("Connected. Logging in..."); });
     irc.on('login', function() {

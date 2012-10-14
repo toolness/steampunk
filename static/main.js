@@ -19,7 +19,7 @@ define([
     var lastChunk = -CHUNK_SIZE;
 
     function logOldMessage(msg, options) {
-      logArea.logSocialMessage(_.extend({
+      return logArea.logSocialMessage(_.extend({
         target: msg.to,
         className: "old-msg",
         nick: msg.nick,
@@ -40,9 +40,9 @@ define([
           var newLastChunk = lastChunk - CHUNK_SIZE;
           irc.getLoggedMessages(newLastChunk, lastChunk, function(messages) {
             fetchMore.removeClass("loading");
-            messages.forEach(function(msg) {
-              logOldMessage(msg, {where: oldMessages});
-            });
+            for (var i = 0; i < messages.length; i++)
+              if (!logOldMessage(messages[i], {where: oldMessages}))
+                return fetchMore.fadeOut();
             if (messages.length == 0)
               fetchMore.fadeOut();
           });
@@ -50,10 +50,11 @@ define([
           oldMessages.insertAfter(fetchMore).hide().fadeIn();
         });
         logArea.logElement(fetchMore);
+
+        for (var i = 0; i < messages.length; i++)
+          if (!logOldMessage(messages[i], {forceScroll: true}))
+            return fetchMore.remove();
       }
-      messages.forEach(function(msg) {
-        logOldMessage(msg, {forceScroll: true});
-      });
     });
   }
   

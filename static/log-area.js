@@ -16,6 +16,7 @@ define([
   }
 
   return function LogArea(options) {
+    var socialMessagesLogged = {};
     var messages = $(options.element);
     var twitterUsers = options.twitterUsers;
     var scrollToTimeout;
@@ -79,6 +80,14 @@ define([
         var targetType = (target[0] == "#") ? "channel-msg" : "private-msg";
         var classSuffix = options.className ? (' ' + options.className) : '';
         var timestamp = options.timestamp || Date.now();
+        var signature = [target, Math.floor(timestamp / 1000),
+                         options.message].join('|');
+        
+        if (signature in socialMessagesLogged)
+          return false;
+        else
+          socialMessagesLogged[signature] = true;
+        
         var html = _.template(messageTemplate, {
           targetType: targetType + classSuffix,
           nick: options.nick,
@@ -97,6 +106,8 @@ define([
           html.appendTo(options.where)
         else
           addToLog(html, options.forceScroll);
+
+        return true;
       },
       log: function log(type, msg) {
         if (msg === undefined) {

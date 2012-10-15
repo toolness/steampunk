@@ -44,7 +44,7 @@ define([
             fetchMore.removeClass("loading");
             for (var i = 0; i < messages.length; i++)
               if (!logOldMessage(messages[i], {where: oldMessages}))
-                return fetchMore.fadeOut();
+                fetchMore.fadeOut();
             if (messages.length == 0)
               fetchMore.fadeOut();
           });
@@ -55,7 +55,7 @@ define([
 
         for (var i = 0; i < messages.length; i++)
           if (!logOldMessage(messages[i], {forceScroll: true}))
-            return fetchMore.remove();
+            fetchMore.remove();
       }
     });
   }

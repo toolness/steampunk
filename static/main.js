@@ -43,8 +43,7 @@ define([
           irc.getLoggedMessages(newLastChunk, lastChunk, function(messages) {
             fetchMore.removeClass("loading");
             for (var i = 0; i < messages.length; i++)
-              if (!logOldMessage(messages[i], {where: oldMessages}))
-                fetchMore.fadeOut();
+              logOldMessage(messages[i], {where: oldMessages});
             if (messages.length == 0)
               fetchMore.fadeOut();
           });
@@ -54,8 +53,7 @@ define([
         logArea.logElement(fetchMore);
 
         for (var i = 0; i < messages.length; i++)
-          if (!logOldMessage(messages[i], {forceScroll: true}))
-            fetchMore.remove();
+          logOldMessage(messages[i], {forceScroll: true});
       }
     });
   }

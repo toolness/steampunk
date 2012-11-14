@@ -63,9 +63,8 @@ Object.keys(config.users).forEach(function(username) {
 
 app.use(express.static(__dirname + '/static'));
 
-app.use(express.bodyParser());
-
-app.post('/verify', persona.LoginFromAssertionEndpoint(config));
+app.post('/verify', express.bodyParser(),
+         persona.LoginFromAssertionEndpoint(config));
 
 function onUserLogin(socket, username) {
   var ircClient = ircClients[username],

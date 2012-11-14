@@ -179,6 +179,7 @@ function onUserLogin(socket, username) {
     ircClient.send("NAMES", data.channel);
   });
   socket.on('say', function(data) {
+    console.log("SAY", data);
     ircClient.say(data.target, data.message);
   });
   socket.on('ping', function() {

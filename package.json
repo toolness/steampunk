@@ -1,12 +1,12 @@
 { "name": "steampunk"
 , "description": "very kludgy irc client."
-, "version": "0.1.0"
+, "version": "0.1.1"
 , "private": true
 , "scripts" :
   { "test" : "node_modules/mocha/bin/mocha -R spec && node test/phantom/run.js" }
 , "dependencies":
-  { "express": "2.5.x"
-  , "socket.io": "0.9.x"
+  { "express": "2.5.10"
+  , "socket.io": "0.9.6"
   , "mocha": "1.2.x"
   , "expect.js": "0.1.x"
   , "irc": "git://github.com/toolness/node-irc.git#0f8df959eb0fc6374df16716b3e2a8f26889f475"

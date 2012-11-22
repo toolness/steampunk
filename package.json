@@ -5,8 +5,8 @@
 , "scripts" :
   { "test" : "node_modules/mocha/bin/mocha -R spec && node test/phantom/run.js" }
 , "dependencies":
-  { "express": "2.5.10"
-  , "socket.io": "0.9.6"
+  { "express": "2.5.11"
+  , "socket.io": "0.9.10"
   , "mocha": "1.2.x"
   , "expect.js": "0.1.x"
   , "irc": "git://github.com/toolness/node-irc.git#0f8df959eb0fc6374df16716b3e2a8f26889f475"

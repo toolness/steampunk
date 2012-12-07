@@ -92,6 +92,10 @@ define([
 
     convertLinksToThumbnails(logArea);
     cmdLine.el.focus();
+    $(window).keydown(function(event) {
+      if (!cmdLine.el.is(event.target))
+        cmdLine.el.focus();
+    });
     irc.on('connect', function() { log("Connected. Logging in..."); });
     irc.on('login', function() {
       var channels = irc.users.getAllChannels();

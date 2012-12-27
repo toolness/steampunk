@@ -22,7 +22,12 @@ This project is highly experimental and the UI is quite preliminary.
     npm test
     cp config.sample.json storage-data/config.json
 
-Edit `config.json` to taste, then run:
+Edit `config.json` to taste. Note that the `audience` parameter should be
+set to the origin of your web server; this will be used for [Persona][]
+login, though you can also ignore this field if you only want to authenticate
+using username/password authentication.
+
+Now run:
 
     node app.js
 
@@ -80,3 +85,4 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   [steampunk]: http://en.wikipedia.org/wiki/Steampunk
   [localhost:3000/test]: http://localhost:3000/test/
   [localhost:3000]: http://localhost:3000/
+  [Persona]: https://persona.org/

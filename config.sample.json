@@ -1,9 +1,11 @@
 {
   "config": {
+    "audience": "http://localhost:3000",
     "users": {
       "tester": {
         "password": "tester",
         "nick": "tester",
+        "emails": ["tester@tester.org"],
         "realName": "Steampunk IRC Test User"
       }
     },

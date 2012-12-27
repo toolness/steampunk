@@ -17,12 +17,17 @@ const AWAY_SUFFIX = '-away',
       MESSAGE_LOG_SAVE_DELAY = 3000,
       USER_LOGOUT_TIMEOUT = 4000;
 
-if (!config.audience)
-  config.audience = process.env['PERSONA_AUDIENCE'];
+if (!config) {
+  console.log('Please copy config.sample.json to storage-data/config.json ' +
+              'and edit it. See README.md for more details.');
+  process.exit(1);
+}
+
+config.audience = process.env['PERSONA_AUDIENCE'] || config.audience;
 
 if (!config.audience) {
   console.log('Please set the PERSONA_AUDIENCE environment variable ' +
-              'or define config.audience.');
+              'or define config.audience. See README.md for more details.');
   process.exit(1);
 }
 

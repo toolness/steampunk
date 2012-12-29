@@ -14,6 +14,11 @@ humorous and apt.
 
 This project is highly experimental and the UI is quite preliminary.
 
+## Prerequisites
+
+Only [node][] is required to run the app. If you want to run the test suite
+from the command-line via `npm test`, you'll also need [phantomjs][].
+
 ## Quick Start
 
     git clone git://github.com/toolness/steampunk.git
@@ -86,3 +91,5 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   [localhost:3000/test]: http://localhost:3000/test/
   [localhost:3000]: http://localhost:3000/
   [Persona]: https://persona.org/
+  [node]: http://nodejs.org/
+  [phantomjs]: http://phantomjs.org/

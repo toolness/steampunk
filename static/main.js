@@ -93,7 +93,7 @@ define([
     convertLinksToThumbnails(logArea);
     cmdLine.el.focus();
     $(window).keydown(function(event) {
-      if (!cmdLine.el.is(event.target))
+      if (!event.ctrlKey && !event.metaKey && !cmdLine.el.is(event.target))
         cmdLine.el.focus();
     });
     irc.on('connect', function() { log("Connected. Logging in..."); });

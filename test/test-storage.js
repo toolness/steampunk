@@ -15,6 +15,32 @@ describe('storage.removeSync()', function() {
   });
 });
 
+describe('storage.load()', function() {
+  function setup() {
+    storage.removeSync('blargle');
+    var blargle = storage.loadSync('blargle');
+    blargle.setSync('u', 'dork');
+  }
+
+  it('should work w/ options', function(done) {
+    setup();
+    storage.load('blargle', {blah: 1}, function(err, asyncBlargle) {
+      expect(err).to.be(null);
+      expect(asyncBlargle.get('u')).to.eql('dork');
+      done();
+    });
+  });
+
+  it('should work w/o options', function(done) {
+    setup();
+    storage.load('blargle', function(err, asyncBlargle) {
+      expect(err).to.be(null);
+      expect(asyncBlargle.get('u')).to.eql('dork');
+      done();
+    });
+  });
+});
+
 describe('storage.removeFromSetSync()', function() {
   it('should remove existing entries', function() {
     var blargle = storage.loadSync('blargle');
@@ -26,7 +52,7 @@ describe('storage.removeFromSetSync()', function() {
 
   it('should be synonymous w/ removeFromSet()', function() {
     var blargle = storage.loadSync('blargle');
-    expect(blargle.removeFromSetSync).to.eql(blargle.removeFromSet);    
+    expect(blargle.removeFromSetSync).to.be(blargle.removeFromSet);    
   });
 });
 
@@ -49,14 +75,14 @@ describe('storage.addToSetSync()', function() {
 
   it('should be synonymous w/ addToSet()', function() {
     var blargle = storage.loadSync('blargle');
-    expect(blargle.addToSetSync).to.eql(blargle.addToSet);    
+    expect(blargle.addToSetSync).to.be(blargle.addToSet);    
   });
 });
 
 describe('storage.setSync()', function() {
   it('should be synonymous w/ set()', function() {
     var blargle = storage.loadSync('blargle');
-    expect(blargle.setSync).to.eql(blargle.set);    
+    expect(blargle.setSync).to.be(blargle.set);    
   });
 });
 

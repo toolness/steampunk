@@ -31,6 +31,15 @@ exports.removeSync = function(key) {
   } catch (e) {}
 };
 
+exports.load = function(key, options, callback) {
+  if (typeof(options) == "function") {
+    callback = options;
+    options = undefined;
+  }
+  var result = exports.loadSync(key, options);
+  process.nextTick(callback.bind(this, null, result));
+};
+
 exports.loadSync = function(key, options) {
   options = options || {};
   

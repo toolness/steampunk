@@ -1,21 +1,49 @@
 var express = require('express'),
     irc = require('irc'),
     socketio = require('socket.io'),
+    async = require('async'),
     persona = require('./persona');
 
 const AWAY_SUFFIX = '-away',
       MESSAGE_LOG_SAVE_DELAY = 3000,
       USER_LOGOUT_TIMEOUT = 4000;
 
-exports.createApp = function createApp(storage, config) {
+exports.createApp = function createApp(storage, config, cb) {
+  async.waterfall([
+    createStorageMap.bind(this, storage, config),
+    createAppWithStorageMap
+  ], cb);
+};
+
+function createStorageMap(storage, config, cb) {
+  var load = storage.load.bind(storage);
+  var tasks = {
+    'channels': load.bind(this, 'channels'),
+    'custom-global-metadata': load.bind(this, 'custom-global-metadata')
+  };
+
+  Object.keys(config.users).forEach(function(username) {
+    var key = 'message-log-' + username;
+    tasks[key] = load.bind(this, key, {
+      flushDelay: MESSAGE_LOG_SAVE_DELAY
+    });
+  });
+
+  async.parallel(tasks, function(err, storageMap) {
+    if (err) return cb(err);
+    cb(null, storageMap, config);
+  });
+}
+
+function createAppWithStorageMap(storageMap, config, cb) {
   var app = express.createServer(),
       io = socketio.listen(app),
       ircClients = {},
       userSockets = {},
       userMessageLogs = {},
       userLogoutTimeouts = {},
-      userChannels = storage.loadSync('channels'),
-      customGlobalMetadata = storage.loadSync('custom-global-metadata');
+      userChannels = storageMap['channels'],
+      customGlobalMetadata = storageMap['custom-global-metadata'];
 
   var onUserLogin = function onUserLogin(socket, username) {
     var ircClient = ircClients[username],
@@ -209,9 +237,7 @@ exports.createApp = function createApp(storage, config) {
   Object.keys(config.users).forEach(function(username) {
     var user = config.users[username];
     user.awayNick = user.nick + AWAY_SUFFIX;
-    userMessageLogs[username] = storage.loadSync('message-log-' + username, {
-      flushDelay: MESSAGE_LOG_SAVE_DELAY
-    });
+    userMessageLogs[username] = storageMap['message-log-' + username];
     ircClients[username] = new irc.Client(config.irc.server, user.awayNick, {
       realName: user.realName,
       channels: userChannels.get(username, []),
@@ -241,5 +267,5 @@ exports.createApp = function createApp(storage, config) {
     });
   });
 
-  return app;
+  cb(null, app);
 };

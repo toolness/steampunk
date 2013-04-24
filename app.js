@@ -20,7 +20,7 @@ storage.load('config', function(err, config) {
   if (err) throw err;
 
   config = config.get();
-  
+
   if (Object.keys(config).length == 0) {
     console.log('Please copy config.sample.json to storage-data/' +
                 'config.json and edit it. See README.md for more details.');
@@ -36,9 +36,10 @@ storage.load('config', function(err, config) {
     process.exit(1);
   }
 
-  var app = server.createApp(storage, config);
-
-  app.listen(port, function() {
-    console.log("listening on port " + port);
+  server.createApp(storage, config, function(err, app) {
+    if (err) throw err;
+    app.listen(port, function() {
+      console.log("listening on port " + port);
+    });
   });
 });

@@ -62,6 +62,7 @@ exports.loadSync = function(key, options) {
 
   var self = {
     get: function(name, defaultValue) {
+      if (arguments.length == 0) return deepCopy(data);
       if (!(name in data))
         return defaultValue;
       return deepCopy(data[name]);

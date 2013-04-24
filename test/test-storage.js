@@ -3,6 +3,14 @@ var expect = require('expect.js'),
       rootDir: __dirname
     });
 
+describe('storage.get()', function() {
+  it('should return whole blob when called w/ no args', function() {
+    var blargle = storage.loadSync('blargle');
+    blargle.setSync('u', 'dork');
+    expect(blargle.get()).to.eql({u: 'dork'});
+  });
+});
+
 describe('storage.removeSync()', function() {
   it('should work', function() {
     storage.removeSync('blargle');

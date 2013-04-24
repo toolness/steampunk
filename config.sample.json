@@ -1,18 +1,16 @@
 {
-  "config": {
-    "audience": "http://localhost:3000",
-    "users": {
-      "tester": {
-        "password": "tester",
-        "nick": "tester",
-        "emails": ["tester@tester.org"],
-        "realName": "Steampunk IRC Test User"
-      }
-    },
-    "irc": {
-      "server": "irc.mozilla.org",
-      "port": 6667,
-      "messageLogEntries": 1000
+  "audience": "http://localhost:3000",
+  "users": {
+    "tester": {
+      "password": "tester",
+      "nick": "tester",
+      "emails": ["tester@tester.org"],
+      "realName": "Steampunk IRC Test User"
     }
+  },
+  "irc": {
+    "server": "irc.mozilla.org",
+    "port": 6667,
+    "messageLogEntries": 1000
   }
 }

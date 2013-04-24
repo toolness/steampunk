@@ -4,7 +4,7 @@ var express = require('express'),
     storage = require('./storage.js').configure({
       rootDir: process.env['STORAGE_ROOT_DIR'] || __dirname + '/storage-data'
     }),
-    config = storage.loadSync('config').get('config'),
+    config = storage.loadSync('config').get(),
     app = express.createServer(),
     io = require('socket.io').listen(app),
     ircClients = {},
@@ -18,11 +18,12 @@ const AWAY_SUFFIX = '-away',
       MESSAGE_LOG_SAVE_DELAY = 3000,
       USER_LOGOUT_TIMEOUT = 4000;
 
-if (!config) {
+if (Object.keys(config).length == 0) {
   console.log('Please copy config.sample.json to storage-data/config.json ' +
               'and edit it. See README.md for more details.');
   process.exit(1);
 }
+if (config.config) config = config.config; // support older schema
 
 config.audience = process.env['PERSONA_AUDIENCE'] || config.audience;
 

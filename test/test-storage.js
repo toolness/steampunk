@@ -88,6 +88,14 @@ describe('storage.addToSetSync()', function() {
 });
 
 describe('storage.setSync()', function() {
+  it('should allow items to be deleted', function() {
+    storage.removeSync('blargle');
+    var blargle = storage.loadSync('blargle');
+    blargle.setSync('u', 'dork');
+    blargle.setSync('u');
+    expect(blargle.get()).to.eql({});
+  });
+
   it('should be synonymous w/ set()', function() {
     var blargle = storage.loadSync('blargle');
     expect(blargle.setSync).to.be(blargle.set);    

@@ -84,7 +84,10 @@ exports.loadSync = function(key, options) {
       }
     },
     setSync: function(name, value) {
-      data[name] = deepCopy(value);
+      if (typeof(value) == "undefined")
+        delete data[name];
+      else
+        data[name] = deepCopy(value);
       fs.writeFileSync(abspath, JSON.stringify(data, null, 2), 'utf8');
     },
     appendToList: function(name, options) {

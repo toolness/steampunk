@@ -2,42 +2,43 @@ var storage = require('./storage.js').configure({
       rootDir: process.env['STORAGE_ROOT_DIR'] || __dirname + '/storage-data'
     }),
     server = require('./server'),
-    port = process.env['PORT'] || 3000,
-    config = storage.loadSync('config').get();
+    port = process.env['PORT'] || 3000;
 
-if (Object.keys(config).length == 0) {
-  console.log('Please copy config.sample.json to storage-data/config.json ' +
-              'and edit it. See README.md for more details.');
-  process.exit(1);
-}
-if (config.config) config = config.config; // support older schema
+process.on('SIGINT', function() {
+  process.exit(0);
+});
 
-config.audience = process.env['PERSONA_AUDIENCE'] || config.audience;
+process.on('exit', function() {
+  console.log("Farewell.");
+});
 
-if (!config.audience) {
-  console.log('Please set the PERSONA_AUDIENCE environment variable ' +
-              'or define config.audience. See README.md for more details.');
-  process.exit(1);
-}
+process.on('uncaughtException', function(err) {
+  console.error("UNCAUGHT EXCEPTION", err);
+});
 
-var app = server.createApp(storage, config);
+storage.load('config', function(err, config) {
+  if (err) throw err;
 
-module.exports = app;
+  config = config.get();
+  
+  if (Object.keys(config).length == 0) {
+    console.log('Please copy config.sample.json to storage-data/' +
+                'config.json and edit it. See README.md for more details.');
+    process.exit(1);
+  }
+  if (config.config) config = config.config; // support older schema
 
-if (!module.parent) {
-  process.on('SIGINT', function() {
-    process.exit(0);
-  });
+  config.audience = process.env['PERSONA_AUDIENCE'] || config.audience;
 
-  process.on('exit', function() {
-    console.log("Farewell.");
-  });
+  if (!config.audience) {
+    console.log('Please set the PERSONA_AUDIENCE environment variable ' +
+                'or define config.audience. See README.md for more details.');
+    process.exit(1);
+  }
 
-  process.on('uncaughtException', function(err) {
-    console.error("UNCAUGHT EXCEPTION", err);
-  });
+  var app = server.createApp(storage, config);
 
   app.listen(port, function() {
     console.log("listening on port " + port);
   });
-}
+});

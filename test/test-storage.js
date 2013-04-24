@@ -23,6 +23,11 @@ describe('storage.removeFromSetSync()', function() {
     expect(blargle.get('beets')).to.eql([1,3]);
     storage.removeSync('blargle');
   });
+
+  it('should be synonymous w/ removeFromSet()', function() {
+    var blargle = storage.loadSync('blargle');
+    expect(blargle.removeFromSetSync).to.eql(blargle.removeFromSet);    
+  });
 });
 
 describe('storage.addToSetSync()', function() {
@@ -40,6 +45,18 @@ describe('storage.addToSetSync()', function() {
     blargle.addToSetSync('beets', 2);
     expect(blargle.get('beets')).to.eql([1,2,3]);
     storage.removeSync('blargle');
+  });
+
+  it('should be synonymous w/ addToSet()', function() {
+    var blargle = storage.loadSync('blargle');
+    expect(blargle.addToSetSync).to.eql(blargle.addToSet);    
+  });
+});
+
+describe('storage.setSync()', function() {
+  it('should be synonymous w/ set()', function() {
+    var blargle = storage.loadSync('blargle');
+    expect(blargle.setSync).to.eql(blargle.set);    
   });
 });
 

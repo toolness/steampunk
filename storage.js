@@ -85,5 +85,10 @@ exports.loadSync = function(key, options) {
         flushTimeout = setTimeout(flush, flushDelay);
     }
   };
+
+  self.addToSet = self.addToSetSync;
+  self.removeFromSet = self.removeFromSetSync;
+  self.set = self.setSync;
+
   return self;
 };

@@ -105,7 +105,7 @@ function onUserLogin(socket, username) {
     },
     join: function(channel, nick) {
       if (nick == userConfig.nick)
-        userChannels.addToSetSync(username, channel);
+        userChannels.addToSet(username, channel);
 
       socket.emit('join', {
         channel: channel,
@@ -136,7 +136,7 @@ function onUserLogin(socket, username) {
     },
     part: function(channel, nick, reason) {
       if (nick == userConfig.nick)
-        userChannels.removeFromSetSync(username, channel);
+        userChannels.removeFromSet(username, channel);
 
       socket.emit('part', {
         channel: channel,
@@ -202,7 +202,7 @@ function onUserLogin(socket, username) {
       delete metadata[data.key];
     else
       metadata[data.key] = data.value;
-    customGlobalMetadata.setSync('data', metadata);
+    customGlobalMetadata.set('data', metadata);
     socket.broadcast.emit('change-custom-global-metadata', data);
   });
   socket.on('get-custom-global-metadata', function() {

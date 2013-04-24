@@ -151,9 +151,17 @@ define([
         message: msg.text
       });
     });
-    irc.on('go-away', function() {
-      log("error", "The server does not seem to like you.");
-      cmdLine.execute("/logout");
+    irc.on('go-away', function(info) {
+      var reasons = {
+        'invalid-credentials': 'Invalid credentials.',
+        'login-from-elsewhere': 'Login detected from another client.'
+      };
+      var msg = reasons[info.reason];
+
+      log("error", msg);
+      if (info.reason == 'invalid-credentials')
+        login.clear();
+      irc.logout();
     });
     irc.on('irc-error', function(info) {
       log("error", "Alas, an IRC error occurred: " + info.command);

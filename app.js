@@ -8,6 +8,7 @@ var express = require('express'),
     app = express.createServer(),
     io = require('socket.io').listen(app),
     ircClients = {},
+    userSockets = {},
     userMessageLogs = {},
     userLogoutTimeouts = {},
     userChannels = storage.loadSync('channels'),
@@ -232,14 +233,31 @@ function onUserLogin(socket, username) {
 
 io.sockets.on('connection', function(socket) {
   socket.on('login', function(data) {
+    var otherSocket = userSockets[data.username];
+    var startSession = function() {
+      if (socket.disconnected) return;
+      if (userSockets[data.username])
+        throw new Error("Assertion failure, userSockets entry exists");
+      userSockets[data.username] = socket;
+      socket.on('disconnect', function() {
+        delete userSockets[data.username];
+      });
+      onUserLogin(socket, data.username);
+    };
+
     if (!(data.username in config.users &&
           data.password == config.users[data.username].password)) {
-      socket.emit('go-away', {});
+      socket.emit('go-away', {reason: 'invalid-credentials'});
       socket.disconnect();
       return;
     }
     
-    onUserLogin(socket, data.username);
+    if (otherSocket) {
+      otherSocket.on('disconnect', startSession);
+      otherSocket.emit('go-away', {reason: 'login-from-elsewhere'});
+      otherSocket.disconnect();
+    } else
+      startSession();
   });
 });
 

@@ -198,16 +198,11 @@ function onUserLogin(socket, username) {
     ircClient.send("TOPIC", data.channel);
   });
   socket.on('set-custom-global-metadata', function(data) {
-    var metadata = customGlobalMetadata.get('data', {});
-    if (!data.value)
-      delete metadata[data.key];
-    else
-      metadata[data.key] = data.value;
-    customGlobalMetadata.set('data', metadata);
+    customGlobalMetadata.set(data.key, data.value || undefined);
     socket.broadcast.emit('change-custom-global-metadata', data);
   });
   socket.on('get-custom-global-metadata', function() {
-    var metadata = customGlobalMetadata.get('data');
+    var metadata = customGlobalMetadata.get();
     socket.emit('custom-global-metadata', metadata);
   });
   socket.on('get-logged-messages', function(data) {

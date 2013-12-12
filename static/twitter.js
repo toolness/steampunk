@@ -48,7 +48,6 @@ define([
             .attr('href', PROFILE_URL + twitterName)
             .attr('title', nick + ' is @' + twitterName + ' on Twitter.');
           var img = $('<img>')
-            .attr('alt', 'Twitter avatar for ' + twitterName)
             .attr('src', AVATAR_IMG + twitterName)
             .appendTo(a);
           return a;
